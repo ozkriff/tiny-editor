@@ -358,18 +358,18 @@ correct_scr(){
 
 
 int
-mystrstr(char * str, char * findme){
-  int t;
+get_offset(char * s, char * findme){
+  int o; /* offset */
   char *p, *p2;
-  for(t=0; str[t]; t++) {
-    p = &str[t];
+  for(o=0; s[o]; o++) {
+    p = &s[o];
     p2 = findme;
     while(*p2 && *p2==*p) {
       p++;
       p2++;
     }
     if(!*p2)
-      return(t);
+      return(o);
   }
   return(-1);
 }
@@ -385,7 +385,7 @@ findnext(){
     char * s = nd->d;
     if(strstr(s, findme)){
       cursor.y = y;
-      cursor.x = mystrstr(s, findme);
+      cursor.x = get_offset(s, findme);
       return;
     }
     nd = nd->n;
