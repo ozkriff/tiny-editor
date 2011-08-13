@@ -104,12 +104,12 @@ readfile(char * fname){
 
 void
 writefile(char * fname){
+  Node * nd;
   FILE * f = fopen(fname, "w");
   if(!f){
     puts("NO FILE!");
     exit(1);
   }
-  Node * nd;
   FOR_EACH_NODE(lines, nd){
     char * s = nd->d;
     fputs(s, f);
@@ -153,13 +153,14 @@ writeline_color(char *s){
 
 void
 writelines(int from, int n){
+  char * s;
   Node * nd = lines.h;
   int i = 0;
   FOR_EACH_NODE(lines, nd){
     if(i >= from){
       if(i == n+from)
         return;
-      char * s = nd->d;
+      s = nd->d;
       writeline(s);
       /* writeline_color(s); */
     }
@@ -206,11 +207,13 @@ id2str(int line){
 
 void
 mv_nextln(){
+  char * s;
+  int n;
   if(cursor.y == (lines.count-1))
     return;
   cursor.y++;
-  char * s = id2str(cursor.y);
-  int n = strlen(s)-1;
+  s = id2str(cursor.y);
+  n = strlen(s)-1;
   if(cursor.x > n)
     cursor.x = n;
 }
@@ -218,11 +221,13 @@ mv_nextln(){
 
 void
 mv_prevln(){
+  char * s;
+  int n;
   if(cursor.y == 0)
     return;
   cursor.y--;
-  char * s = id2str(cursor.y);
-  int n = strlen(s)-1;
+  s = id2str(cursor.y);
+  n = strlen(s)-1;
   if(cursor.x > n)
     cursor.x = n;
 }
@@ -241,9 +246,10 @@ mv_nextch(){
 
 void
 mv_prevch(){
+  char * s;
   if(cursor.x == 0){
     mv_prevln();
-    char * s = id2str(cursor.y);
+    s = id2str(cursor.y);
     cursor.x = strlen(s)-1;
   }else{
     cursor.x--;
@@ -379,10 +385,11 @@ get_offset(char * s, char * findme){
 
 void
 findnext(){
+  Node * nd;
   int y = cursor.y + 1;
   if(y >= lines.count)
     y = 0;
-  Node * nd = id2node(y);
+  nd = id2node(y);
   while(nd && y < lines.count){
     char * s = nd->d;
     if(strstr(s, findme)){
