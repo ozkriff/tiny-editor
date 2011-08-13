@@ -37,7 +37,7 @@ struct List {
   Only pointer to data is stored, no copying! */
 void
 l_insert_node (List * list, void * data, Node * after){
-  Node * pnode; // prev node
+  Node * pnode; /* prev node */
   Node * new = malloc(sizeof(Node));
   new->d = data;
 
@@ -79,12 +79,12 @@ typedef struct Vec2i { int y; int x; } Vec2i;
 
 
 List lines = {0, 0, 0};
-Vec2i cursor = {0, 0};   // cursor position
-Vec2i scrpos = {0, 0};   // current screen position
-Vec2i scr;               // screen size
+Vec2i cursor = {0, 0};   /* cursor position */
+Vec2i scrpos = {0, 0};   /* current screen position */
+Vec2i scr;               /* screen size */
 char findme[100] = "search template";
 char statusline[200] = "[ozkriff's ed]";
-char fname[100];         // file name
+char fname[100];         /* file name */
 
 
 void
@@ -131,12 +131,14 @@ writeline(char * s){
 void
 writeline_color(char *s){
   int len = strlen(s);
-  //int nocollen = 20; // no color len
-  //addnstr(s, nocollen);
-  //attron(COLOR_PAIR(1));
-  //addnstr(s+nocollen, scr.x-nocollen-1);
-  //addnstr(s+nocollen, scr.x-nocollen-1);
-  //attroff(COLOR_PAIR(1));
+/*
+  int nocollen = 20; // no color len
+  addnstr(s, nocollen);
+  attron(COLOR_PAIR(1));
+  addnstr(s+nocollen, scr.x-nocollen-1);
+  addnstr(s+nocollen, scr.x-nocollen-1);
+  attroff(COLOR_PAIR(1));
+*/
   int i;
   for(i=0; i<len; i++){
     if(i==20)
@@ -159,7 +161,7 @@ writelines(int from, int n){
         return;
       char * s = nd->d;
       writeline(s);
-      //writeline_color(s);
+      /* writeline_color(s); */
     }
     i++;
   }
@@ -168,7 +170,6 @@ writelines(int from, int n){
 
 void
 draw_statusline(){
-  //mvprintw(cursor.y-2, 0, statusline);
   mvprintw(scr.y, 0, statusline);
 }
 
@@ -323,11 +324,11 @@ removechar(){
   if(s[cursor.x] == '\n'){
     int len1 = strlen(s) + 1;
 
-    // next string
+    /* next string */
     char * s2 = id2str(cursor.y+1);
     int len2 = strlen(s2) + 1;
 
-    // new string
+    /* new string */
     char * ns = malloc(len1 + len2);
     strcpy(ns, s);
     strcpy(ns + len1 - 2, s2);
@@ -410,7 +411,7 @@ removeln(){
 
 void
 writeas(){
-  char newfname[100]; // new file name
+  char newfname[100]; /* new file name */
   scanw("%s", newfname);
   writefile(newfname);
 }
@@ -456,9 +457,11 @@ init(){
   noecho();
   getmaxyx(stdscr, scr.y, scr.x);
   scr.y--;
-  //start_color();
-  //init_pair(1, COLOR_RED, COLOR_BLACK);
-  //attroff(COLOR_PAIR(1));
+/*
+  start_color();
+  init_pair(1, COLOR_RED, COLOR_BLACK);
+  attroff(COLOR_PAIR(1));
+*/
 }
 
 
