@@ -357,6 +357,7 @@ correct_scr(){
 }
 
 
+/* get offset of substring */
 int
 get_offset(char * s, char * findme){
   int o; /* offset */
