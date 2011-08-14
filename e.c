@@ -445,11 +445,11 @@ setmark(){
 
 /* copy one line to clipboard */
 void
-copy_line(){
+copy_line(int line){
   char *s;
   int len;
   char *s2;
-  s = id2str(cursor.y);
+  s = id2str(line);
   len = strlen(s);
   s2 = malloc(len+1);
   strcpy(s2, s);
@@ -495,7 +495,7 @@ mainloop(){
     if(c=='W') writeas();
     if(c=='X') removeln();
     if(c=='m') setmark();
-    if(c=='c') copy_line();
+    if(c=='c') copy_line(cursor.y);
     if(c=='p') paste_line();
     correct_scr();
     draw();
