@@ -468,6 +468,23 @@ paste_line(){
 
 
 void
+copy(){
+  int i = mark.y;
+  while(cursor.y != i){
+    copy_line(i);
+    i++;
+  }
+}
+
+
+void
+paste(){
+  while(clipboard.count > 0)
+    paste_line();
+}
+
+
+void
 mainloop(){
   int c = ' ';
   while(c != 27 && c != 'q'){
@@ -495,8 +512,8 @@ mainloop(){
     if(c=='W') writeas();
     if(c=='X') removeln();
     if(c=='m') setmark();
-    if(c=='c') copy_line(cursor.y);
-    if(c=='p') paste_line();
+    if(c=='c') copy();
+    if(c=='p') paste();
     correct_scr();
     draw();
   }
