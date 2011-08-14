@@ -90,6 +90,7 @@ typedef struct Vec2i { int y; int x; } Vec2i;
 
 
 List lines = {0, 0, 0};
+List clipboard = {0, 0, 0};
 Vec2i cursor = {0, 0};   /* cursor position */
 Vec2i mark   = {0, 0};
 Vec2i scrpos = {0, 0};   /* current screen position */
@@ -442,6 +443,30 @@ setmark(){
 }
 
 
+/* copy one line to clipboard */
+void
+copy(){
+  char *s;
+  int len;
+  char *s2;
+  s = id2str(cursor.y);
+  len = strlen(s);
+  s2 = malloc(len+1);
+  strcpy(s2, s);
+  l_addhead(&clipboard, s2);
+}
+
+
+/* paste one line from clipboard */
+void
+paste(){
+  char *s = l_extruct_data(&clipboard, clipboard.h);
+  if(!s)
+    exit(1);
+  l_insert_node(&lines, s, id2node(cursor.y));
+}
+
+
 void
 mainloop(){
   int c = ' ';
@@ -470,6 +495,8 @@ mainloop(){
     if(c=='W') writeas();
     if(c=='X') removeln();
     if(c=='m') setmark();
+    if(c=='c') copy();
+    if(c=='p') paste();
     correct_scr();
     draw();
   }
