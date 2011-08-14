@@ -445,7 +445,7 @@ setmark(){
 
 /* copy one line to clipboard */
 void
-copy(){
+copy_line(){
   char *s;
   int len;
   char *s2;
@@ -459,7 +459,7 @@ copy(){
 
 /* paste one line from clipboard */
 void
-paste(){
+paste_line(){
   char *s = l_extruct_data(&clipboard, clipboard.h);
   if(!s)
     exit(1);
@@ -495,8 +495,8 @@ mainloop(){
     if(c=='W') writeas();
     if(c=='X') removeln();
     if(c=='m') setmark();
-    if(c=='c') copy();
-    if(c=='p') paste();
+    if(c=='c') copy_line();
+    if(c=='p') paste_line();
     correct_scr();
     draw();
   }
