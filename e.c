@@ -72,6 +72,17 @@ l_delete_node (List * list, Node * nd){
 }
 
 
+/* Extruct node from list, delete node,
+  return pointer to data. */
+void *
+l_extruct_data (List * list, Node * old){
+  Node * node = l_extruct_node(list, old);
+  void * data = node->d;
+  free(node);
+  return(data);
+}
+
+
 /* ------------------ main code ------------------- */
 
 
