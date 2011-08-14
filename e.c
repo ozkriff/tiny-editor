@@ -91,6 +91,7 @@ typedef struct Vec2i { int y; int x; } Vec2i;
 
 List lines = {0, 0, 0};
 Vec2i cursor = {0, 0};   /* cursor position */
+Vec2i mark   = {0, 0};
 Vec2i scrpos = {0, 0};   /* current screen position */
 Vec2i scr;               /* screen size */
 char findme[100] = "search template";
@@ -436,6 +437,12 @@ writeas(){
 
 
 void
+setmark(){
+  mark = cursor;
+}
+
+
+void
 mainloop(){
   int c = ' ';
   while(c != 27 && c != 'q'){
@@ -462,6 +469,7 @@ mainloop(){
     if(c=='w') writefile(fname);
     if(c=='W') writeas();
     if(c=='X') removeln();
+    if(c=='m') setmark();
     correct_scr();
     draw();
   }
