@@ -41,7 +41,7 @@ l_insert_node (List * list, void * data, Node * after){
   Node * new = malloc(sizeof(Node));
   new->d = data;
 
-  pnode = after ? after : (Node*)list ;
+  pnode = after ? after : list->h ;
   new->n = pnode->n;
   new->p = after;
   pnode->n = new;
