@@ -541,13 +541,13 @@ init(){
 
 int
 main(int ac, char **av){
-  if(ac!=2){
-    puts("./ed <filename>");
-    exit(1);
-  }
-  strcpy(fname, av[1]);
   init();
-  readfile(fname);
+  if(ac == 2){
+    strcpy(fname, av[1]);
+    readfile(fname);
+  }else{
+    newstr("");
+  }
   draw();
   mainloop();
   endwin();
