@@ -305,6 +305,7 @@ insert(){
   char * str;
   char * nstr;
   sprintf(statusline, "[INSERT MODE]");
+  draw();
   while( (c=getch()) != 27){
     if(c!='\n'){
       str = id2str(cursor.y);
