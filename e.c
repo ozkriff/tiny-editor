@@ -509,7 +509,7 @@ mainloop(){
     if(c=='i') insert();
     if(c=='x') removechar();
     if(c=='g') gotostr();
-    if(c=='o') newstr("\n\0");
+    if(c=='o') newstr("\n");
     if(c=='F') get_findme();
     if(c=='f') findnext();
     if(c=='w') writefile(fname);
