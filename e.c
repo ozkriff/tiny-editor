@@ -131,7 +131,7 @@ writefile(char * fname){
     fputs(s, f);
   }
   fclose(f);
-  sprintf(statusline, "[written]");
+  sprintf(statusline, "[written %s]", fname);
 }
 
 
