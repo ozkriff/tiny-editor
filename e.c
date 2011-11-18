@@ -187,7 +187,10 @@ writelines(int from, int n){
 
 void
 draw_statusline(){
-  mvprintw(scr.y, 0, statusline);
+  char s[120];
+  sprintf(s, "%i:%i: %s",
+      cursor.y, cursor.x, statusline);
+  mvprintw(scr.y, 0, s);
 }
 
 
