@@ -111,11 +111,11 @@ Pos scrpos = {0, 0}; /* screen position */
 Pos screen_size;
 char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
-char fname[100];         /* file name */
+char filename[100];
 
 void
-readfile(char *fname){
-  FILE *f = fopen(fname, "r");
+readfile(char *filename){
+  FILE *f = fopen(filename, "r");
   char buffer[300];
   while(fgets(buffer, 299, f)){
     int len = strlen(buffer);
@@ -124,7 +124,7 @@ readfile(char *fname){
     add_node_to_tail(&lines, s);
   }
   fclose(f);
-  sprintf(statusline, "[opened '%s']", fname);
+  sprintf(statusline, "[opened '%s']", filename);
 }
 
 bool
@@ -139,9 +139,9 @@ really(char *message){
 }
 
 void
-writefile(char *fname){
+writefile(char *filename){
   Node *nd;
-  FILE *f = fopen(fname, "w");
+  FILE *f = fopen(filename, "w");
   if(!really("Save file? [y/n]"))
     return;
   if(!f){
@@ -153,7 +153,7 @@ writefile(char *fname){
     fputs(s, f);
   }
   fclose(f);
-  sprintf(statusline, "[written %s]", fname);
+  sprintf(statusline, "[written %s]", filename);
 }
 
 void
@@ -522,7 +522,7 @@ mainloop(){
     if(c=='o') newstr("\n");
     if(c=='F') get_search_template();
     if(c=='f') findnext();
-    if(c=='w') writefile(fname);
+    if(c=='w') writefile(filename);
     if(c=='W') writeas();
     if(c=='X') removeln();
     if(c=='m') setmark();
@@ -547,8 +547,8 @@ int
 main(int ac, char **av){
   init();
   if(ac == 2){
-    strcpy(fname, av[1]);
-    readfile(fname);
+    strcpy(filename, av[1]);
+    readfile(filename);
   }else{
     newstr("");
   }
