@@ -157,7 +157,7 @@ writefile(char *filename){
 }
 
 void
-writeline(char *s){
+drawline(char *s){
   int len = strlen(s);
   addnstr(s, screen_size.x-1);
   if(len > screen_size.x-1)
@@ -165,7 +165,7 @@ writeline(char *s){
 }
 
 void
-writelines(int from, int n){
+drawlines(int from, int n){
   char *s;
   Node *nd = lines.head;
   int i = 0;
@@ -174,7 +174,7 @@ writelines(int from, int n){
       if(i == n+from)
         return;
       s = nd->data;
-      writeline(s);
+      drawline(s);
     }
     i++;
   }
@@ -192,7 +192,7 @@ void
 draw(){
   clear();
   move(0, 0);
-  writelines(scrpos.y, screen_size.y);
+  drawlines(scrpos.y, screen_size.y);
   draw_statusline();
   move(cursor.y-scrpos.y, cursor.x);
   refresh();
