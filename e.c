@@ -431,7 +431,11 @@ removelines(){
 void
 writeas(){
   char newfname[100]; /* new file name */
+  echo();
+  move(screen_size.y, 0);
+  printw("Enter new file name: ");
   scanw("%s", newfname);
+  noecho();
   writefile(newfname);
 }
 
