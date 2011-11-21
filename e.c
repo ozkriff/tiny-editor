@@ -502,7 +502,7 @@ correct_x(){
 void
 mainloop(){
   int c = ' ';
-  while(c != 27 && c != 'q'){
+  while(c != 'q'){
     c = getch();
     /*printw("[%i]", c);*/
     sprintf(statusline, "[key '%i']", c);
