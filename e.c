@@ -418,11 +418,12 @@ paste_line(){
 
 void
 copy(){
-  int i = mark.y;
-  while(cursor.y != i){
+  int i;
+  clean_clipboard();
+  if(mark.y > cursor.y)
+    return;
+  for(i = mark.y; cursor.y >= i; i++)
     copy_line(i);
-    i++;
-  }
 }
 
 void
