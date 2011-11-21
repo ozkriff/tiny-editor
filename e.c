@@ -105,10 +105,10 @@ typedef struct { int y; int x; } Pos;
 
 List lines = {0, 0, 0};
 List clipboard = {0, 0, 0};
-Pos cursor = {0, 0};   /* cursor position */
-Pos mark   = {0, 0};
-Pos scrpos = {0, 0};   /* current screen position */
-Pos scr;               /* screen size */
+Pos cursor = {0, 0}; /* cursor position */
+Pos mark   = {0, 0}; /* marker position */
+Pos scrpos = {0, 0}; /* screen position */
+Pos scr; /* screen size */
 char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char fname[100];         /* file name */
