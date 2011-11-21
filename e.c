@@ -395,7 +395,7 @@ findnext(){
 }
 
 void
-get_findme(){
+get_search_template(){
   move(scr.y, 0);
   echo();
   printw("enter template: ");
@@ -508,7 +508,7 @@ mainloop(){
     if(c=='x') removechar();
     if(c=='g') gotostr();
     if(c=='o') newstr("\n");
-    if(c=='F') get_findme();
+    if(c=='F') get_search_template();
     if(c=='f') findnext();
     if(c=='w') writefile(fname);
     if(c=='W') writeas();
