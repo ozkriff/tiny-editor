@@ -260,7 +260,7 @@ insert(){
   char c;
   char *str;
   char *nstr;
-  sprintf(statusline, "[INSERT MODE]");
+  sprintf(statusline, "[insert mode]");
   draw();
   while( (c=getch()) != 27){
     if(c!='\n'){
