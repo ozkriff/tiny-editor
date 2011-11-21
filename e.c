@@ -504,7 +504,6 @@ mainloop(){
   int c = ' ';
   while(c != 'q'){
     c = getch();
-    /*printw("[%i]", c);*/
     sprintf(statusline, "[key '%i']", c);
     if(c=='h') mv_prevch();
     if(c=='l') mv_nextch();
