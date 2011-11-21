@@ -109,7 +109,7 @@ Pos cursor = {0, 0};   /* cursor position */
 Pos mark   = {0, 0};
 Pos scrpos = {0, 0};   /* current screen position */
 Pos scr;               /* screen size */
-char findme[100] = "search template";
+char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char fname[100];         /* file name */
 
@@ -350,12 +350,12 @@ correct_scr(){
 
 /* get offset of substring */
 int
-get_offset(char *s, char *findme){
+get_offset(char *s, char *search_template){
   int o; /* offset */
   char *p, *p2;
   for(o=0; s[o]; o++) {
     p = &s[o];
-    p2 = findme;
+    p2 = search_template;
     while(*p2 && *p2==*p) {
       p++;
       p2++;
@@ -375,9 +375,9 @@ findnext(){
   nd = id2node(y);
   while(nd && y < lines.size){
     char *s = nd->data;
-    if(strstr(s, findme)){
+    if(strstr(s, search_template)){
       cursor.y = y;
-      cursor.x = get_offset(s, findme);
+      cursor.x = get_offset(s, search_template);
       return;
     }
     nd = nd->next;
@@ -387,7 +387,7 @@ findnext(){
 
 void
 get_findme(){
-  scanw("%s", findme);
+  scanw("%s", search_template);
   findnext();
 }
 
