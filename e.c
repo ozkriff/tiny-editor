@@ -426,6 +426,15 @@ paste(){
 }
 
 void
+correct_x(){
+  int len = strlen(id2str(cursor.y));
+  if(cursor.x >= len)
+    cursor.x = len;
+  if(cursor.x < 0)
+    cursor.x = 0;
+}
+
+void
 mainloop(){
   int c = ' ';
   while(c != 27 && c != 'q'){
@@ -456,6 +465,7 @@ mainloop(){
     if(c=='c') copy();
     if(c=='p') paste();
     correct_scr();
+    correct_x();
     draw();
   }
 }
