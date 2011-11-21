@@ -388,6 +388,12 @@ setmark(){
   mark = cursor;
 }
 
+void
+clean_clipboard(){
+  while(clipboard.count != 0)
+    l_delete_node(&clipboard, clipboard.h);
+}
+
 /* copy one line to clipboard */
 void
 copy_line(int line){
