@@ -127,9 +127,22 @@ readfile(char *fname){
   sprintf(statusline, "[opened '%s']", fname);
 }
 
+bool
+really(char *message){
+  char c;
+  echo();
+  move(scr.y, 0);
+  printw(message);
+  c = getch();
+  noecho();
+  return(c == 'y');
+}
+
 void
 writefile(char *fname){
   Node *nd;
+  if(!really("Save file? [y/n]"))
+    return;
   FILE *f = fopen(fname, "w");
   if(!f){
     puts("NO FILE!");
