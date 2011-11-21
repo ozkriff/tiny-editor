@@ -7,7 +7,6 @@
 #include <locale.h>
 #include <ncurses.h>
 
-
 typedef struct Node Node;
 struct Node {
   Node * n; /* pointer to [n]ext node or NULL */
@@ -22,14 +21,12 @@ struct List {
   int count; /* number of nodes in list */
 };
 
-
 #define l_addhead(list_p, node_p)          l_insert_node(list_p, node_p, NULL)
 #define l_addnext(list_p, node_p, after_p) l_insert_node(list_p, node_p, after_p)
 #define l_addtail(list_p, node_p)          l_insert_node(list_p, node_p, (list_p)->t)
 
 #define FOR_EACH_NODE(list, node_p) \
   for(node_p=(list).h; node_p; node_p=node_p->n)
-
 
 /* Create node <new> that points to <data> and insert 
   this node into list.
@@ -53,7 +50,6 @@ l_insert_node (List * list, void * data, Node * after){
   list->count++;
 }
 
-
 /* Extructs node from list, returns pointer to this node.
   No memory is freed */
 Node *
@@ -66,7 +62,6 @@ l_extruct_node (List * list, Node * nd){
   return(nd);
 }
 
-
 /* Delete data and node. */
 void
 l_delete_node (List * list, Node * nd){
@@ -74,7 +69,6 @@ l_delete_node (List * list, Node * nd){
   free(tmp->d);
   free(tmp);
 }
-
 
 /* Extruct node from list, delete node,
   return pointer to data. */
@@ -86,12 +80,9 @@ l_extruct_data (List * list, Node * old){
   return(data);
 }
 
-
 /* ------------------ main code ------------------- */
 
-
 typedef struct Vec2i { int y; int x; } Vec2i;
-
 
 List lines = {0, 0, 0};
 List clipboard = {0, 0, 0};
@@ -102,7 +93,6 @@ Vec2i scr;               /* screen size */
 char findme[100] = "search template";
 char statusline[200] = "[ozkriff's ed]";
 char fname[100];         /* file name */
-
 
 void
 readfile(char * fname){
@@ -117,7 +107,6 @@ readfile(char * fname){
   fclose(f);
   sprintf(statusline, "[opened '%s']", fname);
 }
-
 
 void
 writefile(char * fname){
@@ -135,7 +124,6 @@ writefile(char * fname){
   sprintf(statusline, "[written %s]", fname);
 }
 
-
 void
 writeline(char * s){
   int len = strlen(s);
@@ -143,7 +131,6 @@ writeline(char * s){
   if(len > scr.x-1)
     addch('\n');
 }
-
 
 void
 writeline_color(char *s){
@@ -167,7 +154,6 @@ writeline_color(char *s){
     addch('\n');
 }
 
-
 void
 writelines(int from, int n){
   char * s;
@@ -185,7 +171,6 @@ writelines(int from, int n){
   }
 }
 
-
 void
 draw_statusline(){
   char s[120];
@@ -193,7 +178,6 @@ draw_statusline(){
       cursor.y, cursor.x, statusline);
   mvprintw(scr.y, 0, s);
 }
-
 
 void
 draw(){
@@ -203,7 +187,6 @@ draw(){
   move(cursor.y-scrpos.y, cursor.x);
   refresh();
 }
-
 
 Node *
 id2node(int line){
@@ -217,13 +200,11 @@ id2node(int line){
   return(NULL);
 }
 
-
 char *
 id2str(int line){
   char * s = id2node(line)->d;
   return(s);
 }
-
 
 void
 mv_nextln(){
@@ -238,7 +219,6 @@ mv_nextln(){
     cursor.x = n;
 }
 
-
 void
 mv_prevln(){
   char * s;
@@ -252,7 +232,6 @@ mv_prevln(){
     cursor.x = n;
 }
 
-
 void
 mv_nextch(){
   char * s = id2str(cursor.y);
@@ -262,7 +241,6 @@ mv_nextch(){
     cursor.x = 0;
   }
 }
-
 
 void
 mv_prevch(){
@@ -276,7 +254,6 @@ mv_prevch(){
   }
 }
 
-
 void
 newstr(char * data){
   char * s = malloc(strlen(data) * sizeof(char) + 1);
@@ -285,7 +262,6 @@ newstr(char * data){
   mv_nextln();
   cursor.x = 0;
 }
-
 
 void
 replace_char(char c){
@@ -301,7 +277,6 @@ replace_char(char c){
     s[cursor.x] = c;
   }
 }
-
 
 void
 insert(){
@@ -328,14 +303,12 @@ insert(){
   sprintf(statusline, "[normal mode]");
 }
 
-
 void
 screenup(){
   int i;
   for(i=0; i<scr.y/2; i++)
     mv_prevln();
 }
-
 
 void
 screendown(){
@@ -344,29 +317,24 @@ screendown(){
     mv_nextln();
 }
 
-
 void
 removechar(){
   char * s = id2str(cursor.y);
   if(s[cursor.x] == '\n'){
     int len1 = strlen(s) + 1;
-
     /* next string */
     char * s2 = id2str(cursor.y+1);
     int len2 = strlen(s2) + 1;
-
     /* new string */
     char * ns = malloc(len1 + len2);
     strcpy(ns, s);
     strcpy(ns + len1 - 2, s2);
-
     l_delete_node(&lines, id2node(cursor.y+1));
     id2node(cursor.y)->d = ns;
     free(s);
   }
   strcpy(s+cursor.x, s+cursor.x+1);
 }
-
 
 void
 gotostr(){
@@ -375,7 +343,6 @@ gotostr(){
   cursor.y = n;
 }
 
-
 void
 correct_scr(){
   while(cursor.y < scrpos.y)
@@ -383,7 +350,6 @@ correct_scr(){
   while(cursor.y >= scrpos.y+scr.y)
     scrpos.y++;
 }
-
 
 /* get offset of substring */
 int
@@ -402,7 +368,6 @@ get_offset(char * s, char * findme){
   }
   return(-1);
 }
-
 
 void
 findnext(){
@@ -423,19 +388,16 @@ findnext(){
   }
 }
 
-
 void
 get_findme(){
   scanw("%s", findme);
   findnext();
 }
 
-
 void
 removeln(){
   l_delete_node(&lines, id2node(cursor.y));
 }
-
 
 void
 writeas(){
@@ -444,12 +406,10 @@ writeas(){
   writefile(newfname);
 }
 
-
 void
 setmark(){
   mark = cursor;
 }
-
 
 /* copy one line to clipboard */
 void
@@ -464,7 +424,6 @@ copy_line(int line){
   l_addhead(&clipboard, s2);
 }
 
-
 /* paste one line from clipboard */
 void
 paste_line(){
@@ -473,7 +432,6 @@ paste_line(){
     exit(1);
   l_insert_node(&lines, s, id2node(cursor.y));
 }
-
 
 void
 copy(){
@@ -484,13 +442,11 @@ copy(){
   }
 }
 
-
 void
 paste(){
   while(clipboard.count > 0)
     paste_line();
 }
-
 
 void
 mainloop(){
@@ -527,7 +483,6 @@ mainloop(){
   }
 }
 
-
 void
 init(){
   setlocale(LC_ALL,"");
@@ -541,7 +496,6 @@ init(){
   attroff(COLOR_PAIR(1));
 */
 }
-
 
 int
 main(int ac, char **av){
