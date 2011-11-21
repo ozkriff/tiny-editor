@@ -391,9 +391,15 @@ get_findme(){
   findnext();
 }
 
+/* Remove lines from mark to cursor. */
 void
 removeln(){
-  delete_node(&lines, id2node(cursor.y));
+  int count = cursor.y - mark.y;
+  if(count < 0)
+    return;
+  for(; count >= 0; count--)
+    delete_node(&lines, id2node(mark.y));
+  cursor.y = mark.y;
 }
 
 void
