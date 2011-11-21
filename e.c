@@ -103,8 +103,8 @@ add_node_to_tail(List *list, void *data){
 
 typedef struct { int y; int x; } Pos;
 
-List lines = {0, 0, 0};
-List clipboard = {0, 0, 0};
+List lines = {NULL, NULL, 0};
+List clipboard = {NULL, NULL, 0};
 Pos cursor = {0, 0}; /* cursor position */
 Pos marker = {0, 0}; /* marker position */
 Pos scrpos = {0, 0}; /* screen position */
