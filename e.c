@@ -8,25 +8,22 @@
 #include <ncurses.h>
 
 typedef struct Node Node;
-struct Node {
-  Node *n; /* pointer to [n]ext node or NULL */
-  Node *p; /* pointer to [p]revious node or NULL */
-  void *d; /* pointer to [d]ata */
-};
-
 typedef struct List List;
-struct List {
-  Node *h; /* pointer to first ([h]ead) node */
-  Node *t; /* pointer to last ([t]ail) node */
-  int count; /* number of nodes in list */
+
+struct Node {
+  Node *next;
+  Node *prev;
+  void *data;
 };
 
-#define l_addhead(list_p, node_p)          l_insert_node(list_p, node_p, NULL)
-#define l_addnext(list_p, node_p, after_p) l_insert_node(list_p, node_p, after_p)
-#define l_addtail(list_p, node_p)          l_insert_node(list_p, node_p, (list_p)->t)
+struct List {
+  Node *head;
+  Node *tail;
+  int size;
+};
 
 #define FOR_EACH_NODE(list, node_p) \
-  for(node_p=(list).h; node_p; node_p=node_p->n)
+  for(node_p=(list).head; node_p; node_p=node_p->next)
 
 /* Create node <new> that points to <data> and insert 
   this node into list.
@@ -34,53 +31,75 @@ struct List {
   of the list, else it will be added following <after>.
   Only pointer to data is stored, no copying! */
 void
-l_insert_node (List *list, void *data, Node *after){
+insert_node (List *list, void *data, Node *after){
   Node *new = malloc(sizeof(Node));
-  new->d = data;
+  new->data = data;
   if(after){
-    new->n = after->n;
-    new->p = after;
-    after->n = new;
+    new->next = after->next;
+    new->prev = after;
+    after->next = new;
   }else{
-    new->n = list->h;
-    new->p = after;
-    list->h = new;
+    new->next = list->head;
+    new->prev = after;
+    list->head = new;
   }
-  if(new->n)  new->n->p=new;  else  list->t=new;
-  list->count++;
+  if(new->next)
+    new->next->prev = new;
+  else
+    list->tail = new;
+  list->size++;
 }
 
 /* Extructs node from list, returns pointer to this node.
   No memory is freed */
 Node *
-l_extruct_node (List *list, Node *nd){
-  if(nd){
-    if(nd->n)  nd->n->p=nd->p;  else  list->t=nd->p;
-    if(nd->p)  nd->p->n=nd->n;  else  list->h=nd->n;
-    list->count--;
-  }
+extruct_node (List *list, Node *nd){
+  if(!nd)
+    return(NULL);
+  if(nd->next)
+    nd->next->prev = nd->prev;
+  else
+    list->tail = nd->prev;
+  if(nd->prev)
+    nd->prev->next = nd->next;
+  else
+    list->head = nd->next;
+  list->size--;
   return(nd);
 }
 
 /* Delete data and node. */
 void
-l_delete_node (List *list, Node *nd){
-  Node *tmp = l_extruct_node(list, nd);
-  free(tmp->d);
+delete_node (List *list, Node *nd){
+  Node *tmp = extruct_node(list, nd);
+  free(tmp->data);
   free(tmp);
 }
 
 /* Extruct node from list, delete node,
   return pointer to data. */
 void *
-l_extruct_data (List *list, Node *old){
-  Node *node = l_extruct_node(list, old);
-  void *data = node->d;
+extruct_data (List *list, Node *old){
+  Node *node = extruct_node(list, old);
+  void *data = node->data;
   free(node);
   return(data);
 }
 
-/* ------------------ main code ------------------- */
+void
+add_node_to_head(List *list, void *data){
+  insert_node(list, data, NULL);
+}
+
+void
+add_mode_after(List *list, void *data, Node *after){
+  insert_node(list, data, after);
+}
+
+void
+add_node_to_tail(List *list, void *data){
+  insert_node(list, data, list->tail);
+}
 
 typedef struct { int y; int x; } Pos;
 
@@ -102,7 +121,7 @@ readfile(char *fname){
     int len = strlen(buffer);
     char *s = malloc(len * sizeof(char) + 1);
     strcpy(s, buffer);
-    l_addtail(&lines, s);
+    add_node_to_tail(&lines, s);
   }
   fclose(f);
   sprintf(statusline, "[opened '%s']", fname);
@@ -117,7 +136,7 @@ writefile(char *fname){
     exit(1);
   }
   FOR_EACH_NODE(lines, nd){
-    char *s = nd->d;
+    char *s = nd->data;
     fputs(s, f);
   }
   fclose(f);
@@ -135,13 +154,13 @@ writeline(char *s){
 void
 writelines(int from, int n){
   char *s;
-  Node *nd = lines.h;
+  Node *nd = lines.head;
   int i = 0;
   FOR_EACH_NODE(lines, nd){
     if(i >= from){
       if(i == n+from)
         return;
-      s = nd->d;
+      s = nd->data;
       writeline(s);
     }
     i++;
@@ -168,7 +187,7 @@ draw(){
 
 Node *
 id2node(int line){
-  Node *nd = lines.h;
+  Node *nd = lines.head;
   int i = 0;
   FOR_EACH_NODE(lines, nd){
     if(i == line)
@@ -180,7 +199,7 @@ id2node(int line){
 
 char *
 id2str(int line){
-  char *s = id2node(line)->d;
+  char *s = id2node(line)->data;
   return(s);
 }
 
@@ -188,7 +207,7 @@ void
 mv_nextln(){
   char *s;
   int n;
-  if(cursor.y == (lines.count-1))
+  if(cursor.y == (lines.size-1))
     return;
   cursor.y++;
   s = id2str(cursor.y);
@@ -236,7 +255,7 @@ void
 newstr(char *data){
   char *s = malloc(strlen(data) * sizeof(char) + 1);
   strcpy(s, data);
-  l_insert_node(&lines, s, id2node(cursor.y));
+  insert_node(&lines, s, id2node(cursor.y));
   mv_nextln();
   cursor.x = 0;
 }
@@ -270,7 +289,7 @@ insert(){
       strncpy(nstr, str, cursor.x);
       strcpy(nstr + cursor.x + 1, str + cursor.x);
       free(str);
-      id2node(cursor.y)->d = nstr;
+      id2node(cursor.y)->data = nstr;
       replace_char(c);
       cursor.x++;
     }else{
@@ -307,8 +326,8 @@ removechar(){
     char *ns = malloc(len1 + len2);
     strcpy(ns, s);
     strcpy(ns + len1 - 2, s2);
-    l_delete_node(&lines, id2node(cursor.y+1));
-    id2node(cursor.y)->d = ns;
+    delete_node(&lines, id2node(cursor.y+1));
+    id2node(cursor.y)->data = ns;
     free(s);
   }
   strcpy(s+cursor.x, s+cursor.x+1);
@@ -351,17 +370,17 @@ void
 findnext(){
   Node *nd;
   int y = cursor.y + 1;
-  if(y >= lines.count)
+  if(y >= lines.size)
     y = 0;
   nd = id2node(y);
-  while(nd && y < lines.count){
-    char *s = nd->d;
+  while(nd && y < lines.size){
+    char *s = nd->data;
     if(strstr(s, findme)){
       cursor.y = y;
       cursor.x = get_offset(s, findme);
       return;
     }
-    nd = nd->n;
+    nd = nd->next;
     y++;
   }
 }
@@ -374,7 +393,7 @@ get_findme(){
 
 void
 removeln(){
-  l_delete_node(&lines, id2node(cursor.y));
+  delete_node(&lines, id2node(cursor.y));
 }
 
 void
@@ -391,8 +410,8 @@ setmark(){
 
 void
 clean_clipboard(){
-  while(clipboard.count != 0)
-    l_delete_node(&clipboard, clipboard.h);
+  while(clipboard.size != 0)
+    delete_node(&clipboard, clipboard.head);
 }
 
 /* copy one line to clipboard */
@@ -405,16 +424,16 @@ copy_line(int line){
   len = strlen(s);
   s2 = malloc(len+1);
   strcpy(s2, s);
-  l_addhead(&clipboard, s2);
+  add_node_to_head(&clipboard, s2);
 }
 
 /* paste one line from clipboard */
 void
 paste_line(){
-  char *s = l_extruct_data(&clipboard, clipboard.h);
+  char *s = extruct_data(&clipboard, clipboard.head);
   if(!s)
     exit(1);
-  l_insert_node(&lines, s, id2node(cursor.y));
+  insert_node(&lines, s, id2node(cursor.y));
 }
 
 void
@@ -431,11 +450,11 @@ void
 paste(){
   Node *n;
   FOR_EACH_NODE(clipboard, n){
-    char *original = n->d;
+    char *original = n->data;
     int length = strlen(original);
     char *new = calloc(length +1 +1, sizeof(char));
     strcpy(new, original);
-    l_insert_node(&lines, new, id2node(cursor.y));
+    insert_node(&lines, new, id2node(cursor.y));
   }
 }
 
@@ -463,7 +482,7 @@ mainloop(){
     if(c=='L') cursor.x = strlen(id2str(cursor.y))-1;
     if(c=='d') screendown();
     if(c=='u') screenup();
-    if(c=='D') cursor.y = lines.count-1;
+    if(c=='D') cursor.y = lines.size-1;
     if(c=='U') cursor.y = 0;
     if(c=='r') replace_char(getch());
     if(c=='i') insert();
