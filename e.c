@@ -9,15 +9,15 @@
 
 typedef struct Node Node;
 struct Node {
-  Node * n; /* pointer to [n]ext node or NULL */
-  Node * p; /* pointer to [p]revious node or NULL */
-  void * d; /* pointer to [d]ata */
+  Node *n; /* pointer to [n]ext node or NULL */
+  Node *p; /* pointer to [p]revious node or NULL */
+  void *d; /* pointer to [d]ata */
 };
 
 typedef struct List List;
 struct List {
-  Node * h; /* pointer to first ([h]ead) node */
-  Node * t; /* pointer to last ([t]ail) node */
+  Node *h; /* pointer to first ([h]ead) node */
+  Node *t; /* pointer to last ([t]ail) node */
   int count; /* number of nodes in list */
 };
 
@@ -34,8 +34,8 @@ struct List {
   of the list, else it will be added following <after>.
   Only pointer to data is stored, no copying! */
 void
-l_insert_node (List * list, void * data, Node * after){
-  Node * new = malloc(sizeof(Node));
+l_insert_node (List *list, void *data, Node *after){
+  Node *new = malloc(sizeof(Node));
   new->d = data;
   if(after){
     new->n = after->n;
@@ -53,7 +53,7 @@ l_insert_node (List * list, void * data, Node * after){
 /* Extructs node from list, returns pointer to this node.
   No memory is freed */
 Node *
-l_extruct_node (List * list, Node * nd){
+l_extruct_node (List *list, Node *nd){
   if(nd){
     if(nd->n)  nd->n->p=nd->p;  else  list->t=nd->p;
     if(nd->p)  nd->p->n=nd->n;  else  list->h=nd->n;
@@ -64,8 +64,8 @@ l_extruct_node (List * list, Node * nd){
 
 /* Delete data and node. */
 void
-l_delete_node (List * list, Node * nd){
-  Node * tmp = l_extruct_node(list, nd);
+l_delete_node (List *list, Node *nd){
+  Node *tmp = l_extruct_node(list, nd);
   free(tmp->d);
   free(tmp);
 }
@@ -73,9 +73,9 @@ l_delete_node (List * list, Node * nd){
 /* Extruct node from list, delete node,
   return pointer to data. */
 void *
-l_extruct_data (List * list, Node * old){
-  Node * node = l_extruct_node(list, old);
-  void * data = node->d;
+l_extruct_data (List *list, Node *old){
+  Node *node = l_extruct_node(list, old);
+  void *data = node->d;
   free(node);
   return(data);
 }
@@ -95,12 +95,12 @@ char statusline[200] = "[ozkriff's ed]";
 char fname[100];         /* file name */
 
 void
-readfile(char * fname){
-  FILE * f = fopen(fname, "r");
+readfile(char *fname){
+  FILE *f = fopen(fname, "r");
   char buffer[300];
   while(fgets(buffer, 299, f)){
     int len = strlen(buffer);
-    char * s = malloc(len * sizeof(char) + 1);
+    char *s = malloc(len * sizeof(char) + 1);
     strcpy(s, buffer);
     l_addtail(&lines, s);
   }
@@ -109,15 +109,15 @@ readfile(char * fname){
 }
 
 void
-writefile(char * fname){
-  Node * nd;
-  FILE * f = fopen(fname, "w");
+writefile(char *fname){
+  Node *nd;
+  FILE *f = fopen(fname, "w");
   if(!f){
     puts("NO FILE!");
     exit(1);
   }
   FOR_EACH_NODE(lines, nd){
-    char * s = nd->d;
+    char *s = nd->d;
     fputs(s, f);
   }
   fclose(f);
@@ -125,7 +125,7 @@ writefile(char * fname){
 }
 
 void
-writeline(char * s){
+writeline(char *s){
   int len = strlen(s);
   addnstr(s, scr.x-1);
   if(len > scr.x-1)
@@ -134,8 +134,8 @@ writeline(char * s){
 
 void
 writelines(int from, int n){
-  char * s;
-  Node * nd = lines.h;
+  char *s;
+  Node *nd = lines.h;
   int i = 0;
   FOR_EACH_NODE(lines, nd){
     if(i >= from){
@@ -167,7 +167,7 @@ draw(){
 
 Node *
 id2node(int line){
-  Node * nd = lines.h;
+  Node *nd = lines.h;
   int i = 0;
   FOR_EACH_NODE(lines, nd){
     if(i == line)
@@ -179,13 +179,13 @@ id2node(int line){
 
 char *
 id2str(int line){
-  char * s = id2node(line)->d;
+  char *s = id2node(line)->d;
   return(s);
 }
 
 void
 mv_nextln(){
-  char * s;
+  char *s;
   int n;
   if(cursor.y == (lines.count-1))
     return;
@@ -198,7 +198,7 @@ mv_nextln(){
 
 void
 mv_prevln(){
-  char * s;
+  char *s;
   int n;
   if(cursor.y == 0)
     return;
@@ -211,7 +211,7 @@ mv_prevln(){
 
 void
 mv_nextch(){
-  char * s = id2str(cursor.y);
+  char *s = id2str(cursor.y);
   cursor.x++;
   if(s[cursor.x] == '\0'){
     mv_nextln();
@@ -221,7 +221,7 @@ mv_nextch(){
 
 void
 mv_prevch(){
-  char * s;
+  char *s;
   if(cursor.x == 0){
     mv_prevln();
     s = id2str(cursor.y);
@@ -232,8 +232,8 @@ mv_prevch(){
 }
 
 void
-newstr(char * data){
-  char * s = malloc(strlen(data) * sizeof(char) + 1);
+newstr(char *data){
+  char *s = malloc(strlen(data) * sizeof(char) + 1);
   strcpy(s, data);
   l_insert_node(&lines, s, id2node(cursor.y));
   mv_nextln();
@@ -242,7 +242,7 @@ newstr(char * data){
 
 void
 replace_char(char c){
-  char * s = id2str(cursor.y);
+  char *s = id2str(cursor.y);
   if(c=='\n'){
     int oldx = cursor.x;
     newstr(s + cursor.x);
@@ -258,8 +258,8 @@ replace_char(char c){
 void
 insert(){
   char c;
-  char * str;
-  char * nstr;
+  char *str;
+  char *nstr;
   sprintf(statusline, "[INSERT MODE]");
   draw();
   while( (c=getch()) != 27){
@@ -296,14 +296,14 @@ screendown(){
 
 void
 removechar(){
-  char * s = id2str(cursor.y);
+  char *s = id2str(cursor.y);
   if(s[cursor.x] == '\n'){
     int len1 = strlen(s) + 1;
     /* next string */
-    char * s2 = id2str(cursor.y+1);
+    char *s2 = id2str(cursor.y+1);
     int len2 = strlen(s2) + 1;
     /* new string */
-    char * ns = malloc(len1 + len2);
+    char *ns = malloc(len1 + len2);
     strcpy(ns, s);
     strcpy(ns + len1 - 2, s2);
     l_delete_node(&lines, id2node(cursor.y+1));
@@ -330,7 +330,7 @@ correct_scr(){
 
 /* get offset of substring */
 int
-get_offset(char * s, char * findme){
+get_offset(char *s, char *findme){
   int o; /* offset */
   char *p, *p2;
   for(o=0; s[o]; o++) {
@@ -348,13 +348,13 @@ get_offset(char * s, char * findme){
 
 void
 findnext(){
-  Node * nd;
+  Node *nd;
   int y = cursor.y + 1;
   if(y >= lines.count)
     y = 0;
   nd = id2node(y);
   while(nd && y < lines.count){
-    char * s = nd->d;
+    char *s = nd->d;
     if(strstr(s, findme)){
       cursor.y = y;
       cursor.x = get_offset(s, findme);
