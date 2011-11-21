@@ -336,8 +336,17 @@ removechar(){
 void
 gotostr(){
   int n;
+  move(scr.y, 0);
+  printw("enter line number: ");
+  echo();
   scanw("%i", &n);
-  cursor.y = n;
+  noecho();
+  if(n < 0 || n > lines.size - 1){
+    sprintf(statusline, "[bad line number]");
+  }else{
+    sprintf(statusline, "[moved to %i line]", n);
+    cursor.y = n;
+  }
 }
 
 void
