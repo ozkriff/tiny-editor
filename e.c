@@ -108,7 +108,7 @@ List clipboard = {0, 0, 0};
 Pos cursor = {0, 0}; /* cursor position */
 Pos mark   = {0, 0}; /* marker position */
 Pos scrpos = {0, 0}; /* screen position */
-Pos scr; /* screen size */
+Pos screen_size;
 char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char fname[100];         /* file name */
@@ -131,7 +131,7 @@ bool
 really(char *message){
   char c;
   echo();
-  move(scr.y, 0);
+  move(screen_size.y, 0);
   printw(message);
   c = getch();
   noecho();
@@ -159,8 +159,8 @@ writefile(char *fname){
 void
 writeline(char *s){
   int len = strlen(s);
-  addnstr(s, scr.x-1);
-  if(len > scr.x-1)
+  addnstr(s, screen_size.x-1);
+  if(len > screen_size.x-1)
     addch('\n');
 }
 
@@ -185,14 +185,14 @@ draw_statusline(){
   char s[120];
   sprintf(s, "%i:%i: %s",
       cursor.y, cursor.x, statusline);
-  mvprintw(scr.y, 0, s);
+  mvprintw(screen_size.y, 0, s);
 }
 
 void
 draw(){
   clear();
   move(0, 0);
-  writelines(scrpos.y, scr.y);
+  writelines(scrpos.y, screen_size.y);
   draw_statusline();
   move(cursor.y-scrpos.y, cursor.x);
   refresh();
@@ -316,14 +316,14 @@ insert(){
 void
 screenup(){
   int i;
-  for(i=0; i<scr.y/2; i++)
+  for(i=0; i<screen_size.y/2; i++)
     mv_prevln();
 }
 
 void
 screendown(){
   int i;
-  for(i=0; i<scr.y/2; i++)
+  for(i=0; i<screen_size.y/2; i++)
     mv_nextln();
 }
 
@@ -349,7 +349,7 @@ removechar(){
 void
 gotostr(){
   int n;
-  move(scr.y, 0);
+  move(screen_size.y, 0);
   printw("enter line number: ");
   echo();
   scanw("%i", &n);
@@ -366,7 +366,7 @@ void
 correct_scr(){
   while(cursor.y < scrpos.y)
     scrpos.y--;
-  while(cursor.y >= scrpos.y+scr.y)
+  while(cursor.y >= scrpos.y+screen_size.y)
     scrpos.y++;
 }
 
@@ -409,7 +409,7 @@ findnext(){
 
 void
 get_search_template(){
-  move(scr.y, 0);
+  move(screen_size.y, 0);
   echo();
   printw("enter template: ");
   scanw("%s", search_template);
@@ -539,8 +539,8 @@ init(){
   setlocale(LC_ALL,"");
   initscr();
   noecho();
-  getmaxyx(stdscr, scr.y, scr.x);
-  scr.y--;
+  getmaxyx(stdscr, screen_size.y, screen_size.x);
+  screen_size.y--;
 }
 
 int
