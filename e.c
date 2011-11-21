@@ -293,7 +293,7 @@ insert(){
   char c;
   char *str;
   char *nstr;
-  sprintf(statusline, "[insert mode]");
+  sprintf(statusline, "[insert mode. ESC - return to normal mode]");
   draw();
   while( (c=getch()) != 27){
     if(c!='\n'){
