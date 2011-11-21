@@ -449,12 +449,9 @@ clean_clipboard(){
 /* copy one line to clipboard */
 void
 copy_line(int line){
-  char *s;
-  int len;
-  char *s2;
-  s = id2str(line);
-  len = strlen(s);
-  s2 = malloc(len+1);
+  char *s = id2str(line);
+  int len = strlen(s);
+  char *s2 = malloc(len+1);
   strcpy(s2, s);
   add_node_to_head(&clipboard, s2);
 }
