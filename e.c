@@ -396,7 +396,11 @@ findnext(){
 
 void
 get_findme(){
+  move(scr.y, 0);
+  echo();
+  printw("enter template: ");
   scanw("%s", search_template);
+  noecho();
   findnext();
 }
 
