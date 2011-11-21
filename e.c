@@ -419,7 +419,7 @@ get_search_template(){
 
 /* Remove lines from marker to cursor. */
 void
-removeln(){
+removelines(){
   int count = cursor.y - marker.y;
   if(count < 0)
     return;
@@ -521,7 +521,7 @@ mainloop(){
     if(c=='f') findnext();
     if(c=='w') writefile(filename);
     if(c=='W') writeas();
-    if(c=='X') removeln();
+    if(c=='X') removelines();
     if(c=='m') setmark();
     if(c=='c') copy();
     if(c=='p') paste();
