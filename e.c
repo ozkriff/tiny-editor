@@ -141,9 +141,9 @@ really(char *message){
 void
 writefile(char *fname){
   Node *nd;
+  FILE *f = fopen(fname, "w");
   if(!really("Save file? [y/n]"))
     return;
-  FILE *f = fopen(fname, "w");
   if(!f){
     puts("NO FILE!");
     exit(1);
