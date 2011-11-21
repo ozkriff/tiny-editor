@@ -106,7 +106,7 @@ typedef struct { int y; int x; } Pos;
 List lines = {0, 0, 0};
 List clipboard = {0, 0, 0};
 Pos cursor = {0, 0}; /* cursor position */
-Pos mark   = {0, 0}; /* marker position */
+Pos marker = {0, 0}; /* marker position */
 Pos scrpos = {0, 0}; /* screen position */
 Pos screen_size;
 char search_template[100] = "...";
@@ -417,15 +417,15 @@ get_search_template(){
   findnext();
 }
 
-/* Remove lines from mark to cursor. */
+/* Remove lines from marker to cursor. */
 void
 removeln(){
-  int count = cursor.y - mark.y;
+  int count = cursor.y - marker.y;
   if(count < 0)
     return;
   for(; count >= 0; count--)
-    delete_node(&lines, id2node(mark.y));
-  cursor.y = mark.y;
+    delete_node(&lines, id2node(marker.y));
+  cursor.y = marker.y;
 }
 
 void
@@ -437,7 +437,7 @@ writeas(){
 
 void
 setmark(){
-  mark = cursor;
+  marker = cursor;
 }
 
 void
@@ -472,9 +472,9 @@ void
 copy(){
   int i;
   clean_clipboard();
-  if(mark.y > cursor.y)
+  if(marker.y > cursor.y)
     return;
-  for(i = mark.y; cursor.y >= i; i++)
+  for(i = marker.y; cursor.y >= i; i++)
     copy_line(i);
 }
 
