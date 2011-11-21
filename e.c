@@ -82,14 +82,14 @@ l_extruct_data (List *list, Node *old){
 
 /* ------------------ main code ------------------- */
 
-typedef struct Vec2i { int y; int x; } Vec2i;
+typedef struct { int y; int x; } Pos;
 
 List lines = {0, 0, 0};
 List clipboard = {0, 0, 0};
-Vec2i cursor = {0, 0};   /* cursor position */
-Vec2i mark   = {0, 0};
-Vec2i scrpos = {0, 0};   /* current screen position */
-Vec2i scr;               /* screen size */
+Pos cursor = {0, 0};   /* cursor position */
+Pos mark   = {0, 0};
+Pos scrpos = {0, 0};   /* current screen position */
+Pos scr;               /* screen size */
 char findme[100] = "search template";
 char statusline[200] = "[ozkriff's ed]";
 char fname[100];         /* file name */
