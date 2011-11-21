@@ -158,6 +158,7 @@ draw_statusline(){
 
 void
 draw(){
+  clear();
   move(0, 0);
   writelines(scrpos.y, scr.y);
   draw_statusline();
@@ -503,6 +504,7 @@ main(int ac, char **av){
   }
   draw();
   mainloop();
+  clear();
   endwin();
   return(0);
 }
