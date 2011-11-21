@@ -133,28 +133,6 @@ writeline(char * s){
 }
 
 void
-writeline_color(char *s){
-  int len = strlen(s);
-/*
-  int nocollen = 20; // no color len
-  addnstr(s, nocollen);
-  attron(COLOR_PAIR(1));
-  addnstr(s+nocollen, scr.x-nocollen-1);
-  addnstr(s+nocollen, scr.x-nocollen-1);
-  attroff(COLOR_PAIR(1));
-*/
-  int i;
-  for(i=0; i<len; i++){
-    if(i==20)
-      attron(COLOR_PAIR(1));
-    addch(s[i]);
-  }
-  attroff(COLOR_PAIR(1));
-  if(len > scr.x-1)
-    addch('\n');
-}
-
-void
 writelines(int from, int n){
   char * s;
   Node * nd = lines.h;
@@ -165,7 +143,6 @@ writelines(int from, int n){
         return;
       s = nd->d;
       writeline(s);
-      /* writeline_color(s); */
     }
     i++;
   }
@@ -490,11 +467,6 @@ init(){
   noecho();
   getmaxyx(stdscr, scr.y, scr.x);
   scr.y--;
-/*
-  start_color();
-  init_pair(1, COLOR_RED, COLOR_BLACK);
-  attroff(COLOR_PAIR(1));
-*/
 }
 
 int
