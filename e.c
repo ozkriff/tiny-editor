@@ -428,8 +428,14 @@ copy(){
 
 void
 paste(){
-  while(clipboard.count > 0)
-    paste_line();
+  Node *n;
+  FOR_EACH_NODE(clipboard, n){
+    char *original = n->d;
+    int length = strlen(original);
+    char *new = calloc(length +1 +1, sizeof(char));
+    strcpy(new, original);
+    l_insert_node(&lines, new, id2node(cursor.y));
+  }
 }
 
 void
