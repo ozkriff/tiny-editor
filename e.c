@@ -169,8 +169,8 @@ id2node(Buffer b, int line){
 }
 
 char *
-id2str(int line){
-  char *s = id2node(lines, line)->data;
+id2str(Buffer b, int line){
+  char *s = id2node(b, line)->data;
   return(s);
 }
 
@@ -324,7 +324,7 @@ find_screen_x(Pos p){
   int screen_x = 0;
   /*offset in bytes*/
   int o = 0;
-  char *s = id2str(p.y);
+  char *s = id2str(lines, p.y);
   while(o < p.x){
     screen_x++;
     o += utf8len(s[o]);
@@ -348,7 +348,7 @@ mv_nextln(){
   if(cursor.y == (lines.size-1))
     return;
   cursor.y++;
-  s = id2str(cursor.y);
+  s = id2str(lines, cursor.y);
   n = strlen(s)-1;
   if(cursor.x > n)
     cursor.x = n;
@@ -361,7 +361,7 @@ mv_prevln(){
   if(cursor.y == 0)
     return;
   cursor.y--;
-  s = id2str(cursor.y);
+  s = id2str(lines, cursor.y);
   n = strlen(s)-1;
   if(cursor.x > n)
     cursor.x = n;
@@ -369,7 +369,7 @@ mv_prevln(){
 
 void
 mv_nextch(){
-  char *s = id2str(cursor.y);
+  char *s = id2str(lines, cursor.y);
   cursor.x += utf8len(s[cursor.x]);
   if(s[cursor.x] == '\0'){
     mv_nextln();
@@ -380,7 +380,7 @@ mv_nextch(){
 int
 find_prev_char_offset(Pos p){
   unsigned char c;
-  char *s = id2str(p.y);
+  char *s = id2str(lines, p.y);
   int of = p.x; /*offset in bytes*/
   do{
     of--;
@@ -394,7 +394,7 @@ mv_prevch(){
   char *s;
   if(cursor.x == 0){
     mv_prevln();
-    s = id2str(cursor.y);
+    s = id2str(lines, cursor.y);
     cursor.x = strlen(s)-1;
   }else{
     cursor.x = find_prev_char_offset(cursor);
@@ -410,7 +410,7 @@ newstr(char *data){
 
 void
 replace_char(char c){
-  char *s = id2str(cursor.y);
+  char *s = id2str(lines, cursor.y);
   if(c=='\n'){
     int oldx = cursor.x;
     newstr(s + cursor.x);
@@ -432,7 +432,7 @@ insert(){
   draw();
   while( (c=getch()) != 27){
     if(c!='\n'){
-      str = id2str(cursor.y);
+      str = id2str(lines, cursor.y);
       nstr = calloc(strlen(str)+1+1, sizeof(char));
       strncpy(nstr, str, cursor.x);
       strcpy(nstr + cursor.x + 1, str + cursor.x);
@@ -466,7 +466,7 @@ void
 join(char *s){
   int len1 = strlen(s) + 1;
   /* next string */
-  char *s2 = id2str(cursor.y+1);
+  char *s2 = id2str(lines, cursor.y+1);
   int len2 = strlen(s2) + 1;
   /* new string */
   char *ns = malloc(len1 + len2);
@@ -479,7 +479,7 @@ join(char *s){
 
 void
 removechar(){
-  char *s = id2str(cursor.y);
+  char *s = id2str(lines, cursor.y);
   if(s[cursor.x] == '\n')
     join(s);
   else
@@ -593,7 +593,7 @@ clean_clipboard(){
 /* copy one line to clipboard */
 void
 copy_line(int line){
-  char *s = id2str(line);
+  char *s = id2str(lines, line);
   int len = strlen(s);
   char *s2 = malloc(len+1);
   strcpy(s2, s);
@@ -630,7 +630,7 @@ paste(){
 
 void
 correct_x(){
-  int len = strlen(id2str(cursor.y));
+  int len = strlen(id2str(lines, cursor.y));
   if(cursor.x >= len)
     cursor.x = len;
   if(cursor.x < 0)
@@ -654,7 +654,7 @@ mainloop(){
     if(c=='j') mv_nextln();
     if(c=='k') mv_prevln();
     if(c=='H') cursor.x = 0;
-    if(c=='L') cursor.x = strlen(id2str(cursor.y))-1;
+    if(c=='L') cursor.x = strlen(id2str(lines, cursor.y))-1;
     if(c=='d') screendown();
     if(c=='u') screenup();
     if(c=='D') cursor.y = lines.size-1;
