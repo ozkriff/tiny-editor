@@ -103,6 +103,7 @@ add_node_to_tail(List *list, void *data){
 
 typedef struct { int y; int x; } Pos;
 
+bool is_running = true;
 List undo_stack = {NULL, NULL, 0}; 
 List redo_stack = {NULL, NULL, 0};
 List lines = {NULL, NULL, 0};
@@ -577,9 +578,15 @@ correct_x(){
 }
 
 void
+quit(){
+  if(really("quit? (y/n)"))
+    is_running = false;
+}
+
+void
 mainloop(){
-  int c = ' ';
-  while(c != 'q'){
+  int c;
+  while(is_running){
     c = getch();
     sprintf(statusline, "[key '%i']", c);
     if(c=='h') mv_prevch();
@@ -607,6 +614,7 @@ mainloop(){
     if(c=='p') { add_undo_copy(); paste(); }
     if(c=='[') undo();
     if(c==']') redo();
+    if(c=='q') quit();
     correct_scr();
     correct_x();
     draw();
