@@ -557,15 +557,12 @@ get_search_template(){
   findnext();
 }
 
-/* Remove lines from marker to cursor. */
 void
-removelines(){
-  int count = cursor.y - marker.y;
-  if(count < 0)
-    return;
-  for(; count >= 0; count--)
-    delete_node(&lines, id2node(lines, marker.y));
-  cursor.y = marker.y;
+removelines(Buffer *b, int from, int count){
+  while(count > 0){
+    delete_node(b, id2node(*b, from));
+    count--;
+  }
 }
 
 void
@@ -669,7 +666,11 @@ mainloop(){
     if(c=='i') { add_undo_copy(); insert(); }
     if(c=='r') { add_undo_copy(); replace_char(getch()); }
     if(c=='x') { add_undo_copy(); removechar(); }
-    if(c=='X') { add_undo_copy(); removelines(); }
+    if(c=='X') {
+      add_undo_copy();
+      removelines(&lines, marker.y, 1 + cursor.y - marker.y);
+      cursor.y = marker.y;
+    }
     if(c=='p') { add_undo_copy(); paste(&lines, clipboard, cursor.y); }
     if(c=='[') undo();
     if(c==']') redo();
