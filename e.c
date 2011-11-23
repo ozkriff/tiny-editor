@@ -106,11 +106,23 @@ typedef struct { int y; int x; } Pos;
 /*list of 'char*'*/
 typedef List Buffer;
 
+typedef struct {
+  int first;
+  int last_in_original;
+  int last_in_changed;
+  Buffer from_original;
+  Buffer from_changed;
+} Diff;
+
+/*list of 'Diff'*/
+typedef List Diff_stack;
+
 bool is_running = true;
-List undo_stack = {NULL, NULL, 0}; 
-List redo_stack = {NULL, NULL, 0};
+Diff_stack undo_stack = {NULL, NULL, 0}; 
+Diff_stack redo_stack = {NULL, NULL, 0};
 Buffer lines = {NULL, NULL, 0};
 Buffer clipboard = {NULL, NULL, 0};
+Buffer prevlines = {NULL, NULL, 0}; /*for diff creation*/
 Pos cursor = {0, 0};
 Pos marker = {0, 0};
 Pos scrpos = {0, 0};
@@ -226,48 +238,118 @@ clear_buffer(Buffer *buffer){
 void
 clean_stack(List *stack){
   while(stack->size > 0){
-    Buffer *buffer = stack->tail->data;
-    clear_buffer(buffer);
+    Diff *d = stack->tail->data;
+    clear_buffer(&d->from_original);
+    clear_buffer(&d->from_original);
     delete_node(stack, stack->tail);
   }
 }
 
+int
+find_first_changed_line(Buffer changed, Buffer original){
+  int id = 0;
+  Node *n1 = changed.head;
+  Node *n2 = original.head;
+  while(n1 && n2){
+    if(strcmp(n1->data, n2->data) != 0)
+      return(id);
+    n1 = n1->next;
+    n2 = n2->next;
+    id++;
+  }
+  return(changed.size - 1);
+}
+
+int
+find_last_changed_line(Buffer changed, Buffer original){
+  int id = original.size - 1;
+  Node *n1 = changed.tail;
+  Node *n2 = original.tail;
+  while(n1 && n2){
+    if(strcmp(n1->data, n2->data) != 0)
+      return(id);
+    n1 = n1->prev;
+    n2 = n2->prev;
+    id--;
+  }
+  return(0);
+}
+
+int
+find_last_new_line(Buffer changed, Buffer original){
+  int id = changed.size - 1;
+  Node *n1 = changed.tail;
+  Node *n2 = original.tail;
+  while(n1 && n2){
+    if(strcmp(n1->data, n2->data) != 0)
+      return(id);
+    n1 = n1->prev;
+    n2 = n2->prev;
+    id--;
+  }
+  return(0);
+}
+
+Diff
+create_diff(Buffer changed, Buffer original){
+  Diff d;
+  d.first = find_first_changed_line(changed, original);
+  d.last_in_original = find_last_changed_line(changed, original);
+  d.last_in_changed = find_last_new_line(changed, original);
+  d.from_original = copy(original, d.first, d.last_in_original);
+  d.from_changed = copy(changed, d.first, d.last_in_changed);
+  return(d);
+}
+
+void
+undo_diff(Buffer *buffer, Diff d){
+  removelines(buffer, d.first, d.from_changed.size);
+  paste(buffer, d.from_original, d.first);
+}
+
+void
+redo_diff(Buffer *buffer, Diff d){
+  removelines(buffer, d.first, d.from_original.size);
+  paste(buffer, d.from_changed, d.first);
+}
+
 void
 add_undo_copy(){
-  Buffer *new_buffer = calloc(1, sizeof(Buffer));
-  *new_buffer = clone_buffer(lines);
-  add_node_to_tail(&undo_stack, new_buffer);
+  Diff *d = calloc(1, sizeof(Diff));
+  *d = create_diff(lines, prevlines);
+  add_node_to_tail(&undo_stack, d);
+#if 0
+  redo_diff(&prevlines, *d);
+#else
+  clear_buffer(&prevlines);
+  prevlines = clone_buffer(lines);
+#endif
   clean_stack(&redo_stack);
 }
 
-/* move last buffer from stack1 to stack2 */
 void
-move_last_buffer(List *st1, List *st2){
+move_last_diff(Diff_stack *st1, Diff_stack *st2){
   if(st1->size > 0){
-    Buffer *buffer = extruct_data(st1, st1->tail);
-    add_node_to_tail(st2, buffer);
+    Diff *d = extruct_data(st1, st1->tail);
+    add_node_to_tail(st2, d);
   }
 }
 
 void
 undo(){
   if(undo_stack.size > 0){
-    Buffer *buffer;
-    clear_buffer(&lines);
-    buffer = undo_stack.tail->data;
-    lines = clone_buffer(*buffer);
-    move_last_buffer(&undo_stack, &redo_stack);
+    Diff *d = undo_stack.tail->data;
+    undo_diff(&lines, *d);
+    move_last_diff(&undo_stack, &redo_stack);
   }
 }
 
 void
 redo(){
   if(redo_stack.size > 0){
-    Buffer *buffer;
-    clear_buffer(&lines);
-    buffer = redo_stack.tail->data;
-    lines = clone_buffer(*buffer);
-    move_last_buffer(&redo_stack, &undo_stack);
+    Diff *d = redo_stack.tail->data;
+    redo_diff(&lines, *d);
+    move_last_diff(&redo_stack, &undo_stack);
   }
 }
 
@@ -652,16 +734,16 @@ mainloop(){
       clean_clipboard();
       clipboard = copy(lines, marker.y, cursor.y);
     }
-    if(c=='o') { add_undo_copy(); newstr("\n"); }
-    if(c=='i') { add_undo_copy(); insert(); }
-    if(c=='r') { add_undo_copy(); replace_char(getch()); }
-    if(c=='x') { add_undo_copy(); removechar(); }
+    if(c=='o') { newstr("\n"); add_undo_copy(); }
+    if(c=='i') { insert(); add_undo_copy(); }
+    if(c=='r') { replace_char(getch()); add_undo_copy(); }
+    if(c=='x') { removechar(); add_undo_copy(); }
     if(c=='X') {
-      add_undo_copy();
       removelines(&lines, marker.y, 1 + cursor.y - marker.y);
+      add_undo_copy();
       cursor.y = marker.y;
     }
-    if(c=='p') { add_undo_copy(); paste(&lines, clipboard, cursor.y); }
+    if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
     if(c=='[') undo();
     if(c==']') redo();
     if(c=='q') quit();
@@ -686,6 +768,7 @@ main(int ac, char **av){
   if(ac == 2){
     strcpy(filename, av[1]);
     readfile(filename);
+    prevlines = clone_buffer(lines);
   }else{
     newstr("");
   }
