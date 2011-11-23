@@ -116,6 +116,23 @@ char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char filename[100];
 
+int
+utf8len(char ch){
+  unsigned char uc = (unsigned char)ch;
+  if(uc >= 0xFC)
+    return(6);
+  else if(uc >= 0xF8)
+    return(5);
+  else if(uc >= 0xF0)
+    return(4);
+  else if(uc >= 0xE0)
+    return(3);
+  else if(uc >= 0xC0)
+    return(2);
+  else
+    return(1);
+}
+
 char *
 my_strdup(const char *s){
   char *d = calloc(strlen(s)+1, sizeof(char));
