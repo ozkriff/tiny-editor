@@ -103,11 +103,14 @@ add_node_to_tail(List *list, void *data){
 
 typedef struct { int y; int x; } Pos;
 
+/*list of 'char*'*/
+typedef List Buffer;
+
 bool is_running = true;
 List undo_stack = {NULL, NULL, 0}; 
 List redo_stack = {NULL, NULL, 0};
-List lines = {NULL, NULL, 0};
-List clipboard = {NULL, NULL, 0};
+Buffer lines = {NULL, NULL, 0};
+Buffer clipboard = {NULL, NULL, 0};
 Pos cursor = {0, 0};
 Pos marker = {0, 0};
 Pos scrpos = {0, 0};
@@ -153,9 +156,9 @@ my_strdup(const char *s){
   return(d);
 }
  
-List
-clone_buffer(List *buffer){
-  List newlist = {NULL, NULL, 0};
+Buffer
+clone_buffer(Buffer *buffer){
+  Buffer newlist = {NULL, NULL, 0};
   Node *n;
   FOR_EACH_NODE(*buffer, n){
     char *s = n->data;
@@ -165,7 +168,7 @@ clone_buffer(List *buffer){
 }
 
 void
-clear_buffer(List *buffer){
+clear_buffer(Buffer *buffer){
   while(buffer->size > 0)
     delete_node(buffer, buffer->head);
 }
@@ -173,7 +176,7 @@ clear_buffer(List *buffer){
 void
 clean_stack(List *stack){
   while(stack->size > 0){
-    List *buffer = stack->tail->data;
+    Buffer *buffer = stack->tail->data;
     clear_buffer(buffer);
     delete_node(stack, stack->tail);
   }
@@ -181,7 +184,7 @@ clean_stack(List *stack){
 
 void
 add_undo_copy(){
-  List *new_buffer = calloc(1, sizeof(List));
+  Buffer *new_buffer = calloc(1, sizeof(Buffer));
   *new_buffer = clone_buffer(&lines);
   add_node_to_tail(&undo_stack, new_buffer);
   clean_stack(&redo_stack);
@@ -191,7 +194,7 @@ add_undo_copy(){
 void
 move_last_buffer(List *st1, List *st2){
   if(st1->size > 0){
-    List *buffer = extruct_data(st1, st1->tail);
+    Buffer *buffer = extruct_data(st1, st1->tail);
     add_node_to_tail(st2, buffer);
   }
 }
@@ -199,7 +202,7 @@ move_last_buffer(List *st1, List *st2){
 void
 undo(){
   if(undo_stack.size > 0){
-    List *buffer;
+    Buffer *buffer;
     clear_buffer(&lines);
     buffer = undo_stack.tail->data;
     lines = clone_buffer(buffer);
@@ -210,7 +213,7 @@ undo(){
 void
 redo(){
   if(redo_stack.size > 0){
-    List *buffer;
+    Buffer *buffer;
     clear_buffer(&lines);
     buffer = redo_stack.tail->data;
     lines = clone_buffer(buffer);
