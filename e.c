@@ -291,7 +291,7 @@ drawlines(int from, int n){
 void
 draw_statusline(){
   char s[120];
-  sprintf(s, "(c-%i-%i  m-%i-%i u-%i/%i)  %s",
+  sprintf(s, "(c-%i-%i  m-%i-%i  u-%i/%i)  %s",
       cursor.y, cursor.x,
       marker.y, marker.x,
       undo_stack.size,
