@@ -189,12 +189,13 @@ draw_statusline(){
   char s[120];
   sprintf(s, "%i:%i: %s",
       cursor.y, cursor.x, statusline);
-  mvprintw(screen_size.y, 0, s);
+  move(screen_size.y, 0);
+  clrtoeol();
+  printw(s);
 }
 
 void
 draw(){
-  clear();
   move(0, 0);
   drawlines(scrpos.y, screen_size.y);
   draw_statusline();
