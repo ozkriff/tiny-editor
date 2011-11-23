@@ -587,16 +587,6 @@ clean_clipboard(){
     delete_node(&clipboard, clipboard.head);
 }
 
-/* copy one line to clipboard */
-void
-copy_line(int line){
-  char *s = id2str(lines, line);
-  int len = strlen(s);
-  char *s2 = malloc(len+1);
-  strcpy(s2, s);
-  add_node_to_head(&clipboard, s2);
-}
-
 Buffer
 copy(Buffer original, int from, int to){
   Buffer b = {NULL, NULL, 0};
