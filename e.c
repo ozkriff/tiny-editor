@@ -157,10 +157,10 @@ my_strdup(const char *s){
 }
  
 Buffer
-clone_buffer(Buffer *buffer){
+clone_buffer(Buffer buffer){
   Buffer newlist = {NULL, NULL, 0};
   Node *n;
-  FOR_EACH_NODE(*buffer, n){
+  FOR_EACH_NODE(buffer, n){
     char *s = n->data;
     add_node_to_tail(&newlist, my_strdup(s));
   }
@@ -185,7 +185,7 @@ clean_stack(List *stack){
 void
 add_undo_copy(){
   Buffer *new_buffer = calloc(1, sizeof(Buffer));
-  *new_buffer = clone_buffer(&lines);
+  *new_buffer = clone_buffer(lines);
   add_node_to_tail(&undo_stack, new_buffer);
   clean_stack(&redo_stack);
 }
@@ -205,7 +205,7 @@ undo(){
     Buffer *buffer;
     clear_buffer(&lines);
     buffer = undo_stack.tail->data;
-    lines = clone_buffer(buffer);
+    lines = clone_buffer(*buffer);
     move_last_buffer(&undo_stack, &redo_stack);
   }
 }
@@ -216,7 +216,7 @@ redo(){
     Buffer *buffer;
     clear_buffer(&lines);
     buffer = redo_stack.tail->data;
-    lines = clone_buffer(buffer);
+    lines = clone_buffer(*buffer);
     move_last_buffer(&redo_stack, &undo_stack);
   }
 }
