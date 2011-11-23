@@ -116,6 +116,18 @@ char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char filename[100];
 
+bool
+is_ascii(char c){
+  unsigned char uc = c;
+  return(uc < 0x80);
+}
+
+bool
+is_fill(char c){
+  unsigned char uc = c;
+  return(!is_ascii(c) && uc <= 0xBF);
+}
+
 int
 utf8len(char ch){
   unsigned char uc = (unsigned char)ch;
