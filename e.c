@@ -113,16 +113,20 @@ char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char filename[100];
 
+char *
+my_strdup(const char *s){
+  char *d = calloc(strlen(s)+1, sizeof(char));
+  if(d != NULL)
+    strcpy(d, s);
+  return(d);
+}
+
 void
 readfile(char *filename){
   FILE *f = fopen(filename, "r");
-  char buffer[300];
-  while(fgets(buffer, 299, f)){
-    int len = strlen(buffer);
-    char *s = malloc(len * sizeof(char) + 1);
-    strcpy(s, buffer);
-    add_node_to_tail(&lines, s);
-  }
+  char s[300];
+  while(fgets(s, 300, f))
+    add_node_to_tail(&lines, my_strdup(s));
   fclose(f);
   sprintf(statusline, "[opened '%s']", filename);
 }
@@ -266,9 +270,7 @@ mv_prevch(){
 
 void
 newstr(char *data){
-  char *s = malloc(strlen(data) * sizeof(char) + 1);
-  strcpy(s, data);
-  insert_node(&lines, s, id2node(cursor.y));
+  insert_node(&lines, my_strdup(data), id2node(cursor.y));
   mv_nextln();
   cursor.x = 0;
 }
@@ -483,11 +485,8 @@ void
 paste(){
   Node *n;
   FOR_EACH_NODE(clipboard, n){
-    char *original = n->data;
-    int length = strlen(original);
-    char *new = calloc(length +1 +1, sizeof(char));
-    strcpy(new, original);
-    insert_node(&lines, new, id2node(cursor.y));
+    char *s = n->data;
+    insert_node(&lines, my_strdup(s), id2node(cursor.y));
   }
 }
 
