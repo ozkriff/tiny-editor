@@ -306,10 +306,10 @@ draw_statusline(){
 }
 
 Node *
-id2node(int line){
-  Node *nd = lines.head;
+id2node(Buffer b, int line){
+  Node *nd = b.head;
   int i = 0;
-  FOR_EACH_NODE(lines, nd){
+  FOR_EACH_NODE(b, nd){
     if(i == line)
       return(nd);
     i++;
@@ -319,7 +319,7 @@ id2node(int line){
 
 char *
 id2str(int line){
-  char *s = id2node(line)->data;
+  char *s = id2node(lines, line)->data;
   return(s);
 }
 
@@ -408,7 +408,7 @@ mv_prevch(){
 
 void
 newstr(char *data){
-  insert_node(&lines, my_strdup(data), id2node(cursor.y));
+  insert_node(&lines, my_strdup(data), id2node(lines, cursor.y));
   mv_nextln();
   cursor.x = 0;
 }
@@ -442,7 +442,7 @@ insert(){
       strncpy(nstr, str, cursor.x);
       strcpy(nstr + cursor.x + 1, str + cursor.x);
       free(str);
-      id2node(cursor.y)->data = nstr;
+      id2node(lines, cursor.y)->data = nstr;
       replace_char(c);
       cursor.x++;
     }else{
@@ -477,8 +477,8 @@ join(char *s){
   char *ns = malloc(len1 + len2);
   strcpy(ns, s);
   strcpy(ns + len1 - 2, s2);
-  delete_node(&lines, id2node(cursor.y+1));
-  id2node(cursor.y)->data = ns;
+  delete_node(&lines, id2node(lines, cursor.y+1));
+  id2node(lines, cursor.y)->data = ns;
   free(s);
 }
 
@@ -539,7 +539,7 @@ findnext(){
   int y = cursor.y + 1;
   if(y >= lines.size)
     y = 0;
-  nd = id2node(y);
+  nd = id2node(lines, y);
   while(nd && y < lines.size){
     char *s = nd->data;
     if(strstr(s, search_template)){
@@ -569,7 +569,7 @@ removelines(){
   if(count < 0)
     return;
   for(; count >= 0; count--)
-    delete_node(&lines, id2node(marker.y));
+    delete_node(&lines, id2node(lines, marker.y));
   cursor.y = marker.y;
 }
 
@@ -611,7 +611,7 @@ paste_line(){
   char *s = extruct_data(&clipboard, clipboard.head);
   if(!s)
     exit(1);
-  insert_node(&lines, s, id2node(cursor.y));
+  insert_node(&lines, s, id2node(lines, cursor.y));
 }
 
 void
@@ -629,7 +629,7 @@ paste(){
   Node *n;
   FOR_EACH_NODE(clipboard, n){
     char *s = n->data;
-    insert_node(&lines, my_strdup(s), id2node(cursor.y));
+    insert_node(&lines, my_strdup(s), id2node(lines, cursor.y));
   }
 }
 
