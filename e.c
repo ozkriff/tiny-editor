@@ -216,9 +216,16 @@ readfile(char *filename){
   sprintf(statusline, "[opened '%s']", filename);
 }
 
+void
+clear_statusline(){
+  move(screen_size.y, 0);
+  clrtoeol();
+}
+
 bool
 really(char *message){
   char c;
+  clear_statusline();
   echo();
   move(screen_size.y, 0);
   printw(message);
@@ -279,7 +286,7 @@ draw_statusline(){
       redo_stack.size,
       statusline);
   move(screen_size.y, 0);
-  clrtoeol();
+  clear_statusline();
   printw(s);
 }
 
