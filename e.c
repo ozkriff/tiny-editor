@@ -330,22 +330,27 @@ screendown(){
 }
 
 void
+join(char *s){
+  int len1 = strlen(s) + 1;
+  /* next string */
+  char *s2 = id2str(cursor.y+1);
+  int len2 = strlen(s2) + 1;
+  /* new string */
+  char *ns = malloc(len1 + len2);
+  strcpy(ns, s);
+  strcpy(ns + len1 - 2, s2);
+  delete_node(&lines, id2node(cursor.y+1));
+  id2node(cursor.y)->data = ns;
+  free(s);
+}
+
+void
 removechar(){
   char *s = id2str(cursor.y);
-  if(s[cursor.x] == '\n'){
-    int len1 = strlen(s) + 1;
-    /* next string */
-    char *s2 = id2str(cursor.y+1);
-    int len2 = strlen(s2) + 1;
-    /* new string */
-    char *ns = malloc(len1 + len2);
-    strcpy(ns, s);
-    strcpy(ns + len1 - 2, s2);
-    delete_node(&lines, id2node(cursor.y+1));
-    id2node(cursor.y)->data = ns;
-    free(s);
-  }
-  strcpy(s+cursor.x, s+cursor.x+1);
+  if(s[cursor.x] == '\n')
+    join(s);
+  else
+    strcpy(s+cursor.x, s+cursor.x+1);
 }
 
 void
