@@ -600,31 +600,27 @@ copy_line(int line){
   add_node_to_head(&clipboard, s2);
 }
 
-/* paste one line from clipboard */
-void
-paste_line(){
-  char *s = extruct_data(&clipboard, clipboard.head);
-  if(!s)
-    exit(1);
-  insert_node(&lines, s, id2node(lines, cursor.y));
-}
-
-void
-copy(){
-  int i;
-  clean_clipboard();
-  if(marker.y > cursor.y)
-    return;
-  for(i = marker.y; cursor.y >= i; i++)
-    copy_line(i);
-}
-
-void
-paste(){
-  Node *n;
-  FOR_EACH_NODE(clipboard, n){
+Buffer
+copy(Buffer original, int from, int to){
+  Buffer b = {NULL, NULL, 0};
+  Node *n = id2node(original, from);
+  while(from <= to && n){
     char *s = n->data;
-    insert_node(&lines, my_strdup(s), id2node(lines, cursor.y));
+    add_node_to_tail(&b, my_strdup(s));
+    n = n->next;
+    from++;
+  }
+  return(b);
+}
+
+void
+paste(Buffer *to, Buffer from, int fromline){
+  Node *n = id2node(*to, fromline);
+  int i = fromline - 1;
+  FOR_EACH_NODE(from, n){
+    char *s = n->data;
+    insert_node(to, my_strdup(s), id2node(*to, i));
+    i++;
   }
 }
 
@@ -665,13 +661,16 @@ mainloop(){
     if(c=='w') writefile(filename);
     if(c=='W') writeas();
     if(c=='m') setmark();
-    if(c=='c') copy();
+    if(c=='c') {
+      clean_clipboard();
+      clipboard = copy(lines, marker.y, cursor.y);
+    }
     if(c=='o') { add_undo_copy(); newstr("\n"); }
     if(c=='i') { add_undo_copy(); insert(); }
     if(c=='r') { add_undo_copy(); replace_char(getch()); }
     if(c=='x') { add_undo_copy(); removechar(); }
     if(c=='X') { add_undo_copy(); removelines(); }
-    if(c=='p') { add_undo_copy(); paste(); }
+    if(c=='p') { add_undo_copy(); paste(&lines, clipboard, cursor.y); }
     if(c=='[') undo();
     if(c==']') redo();
     if(c=='q') quit();
