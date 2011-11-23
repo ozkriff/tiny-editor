@@ -187,8 +187,10 @@ drawlines(int from, int n){
 void
 draw_statusline(){
   char s[120];
-  sprintf(s, "%i:%i: %s",
-      cursor.y, cursor.x, statusline);
+  sprintf(s, "(c-%i-%i  m-%i-%i)  %s",
+      cursor.y, cursor.x,
+      marker.y, marker.x,
+      statusline);
   move(screen_size.y, 0);
   clrtoeol();
   printw(s);
