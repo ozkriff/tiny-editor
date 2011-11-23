@@ -302,15 +302,6 @@ draw_statusline(){
   printw(s);
 }
 
-void
-draw(){
-  move(0, 0);
-  drawlines(scrpos.y, screen_size.y);
-  draw_statusline();
-  move(cursor.y-scrpos.y, cursor.x);
-  refresh();
-}
-
 Node *
 id2node(int line){
   Node *nd = lines.head;
@@ -327,6 +318,15 @@ char *
 id2str(int line){
   char *s = id2node(line)->data;
   return(s);
+}
+
+void
+draw(){
+  move(0, 0);
+  drawlines(scrpos.y, screen_size.y);
+  draw_statusline();
+  move(cursor.y-scrpos.y, cursor.x);
+  refresh();
 }
 
 void
