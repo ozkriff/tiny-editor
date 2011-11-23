@@ -156,6 +156,24 @@ my_strdup(const char *s){
   return(d);
 }
  
+Node *
+id2node(Buffer b, int line){
+  Node *nd = b.head;
+  int i = 0;
+  FOR_EACH_NODE(b, nd){
+    if(i == line)
+      return(nd);
+    i++;
+  }
+  return(NULL);
+}
+
+char *
+id2str(int line){
+  char *s = id2node(lines, line)->data;
+  return(s);
+}
+
 Buffer
 clone_buffer(Buffer buffer){
   Buffer newlist = {NULL, NULL, 0};
@@ -303,24 +321,6 @@ draw_statusline(){
   move(screen_size.y, 0);
   clear_statusline();
   printw(s);
-}
-
-Node *
-id2node(Buffer b, int line){
-  Node *nd = b.head;
-  int i = 0;
-  FOR_EACH_NODE(b, nd){
-    if(i == line)
-      return(nd);
-    i++;
-  }
-  return(NULL);
-}
-
-char *
-id2str(int line){
-  char *s = id2node(lines, line)->data;
-  return(s);
 }
 
 int
