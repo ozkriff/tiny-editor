@@ -103,6 +103,8 @@ add_node_to_tail(List *list, void *data){
 
 typedef struct { int y; int x; } Pos;
 
+List undo_stack = {NULL, NULL, 0}; 
+List redo_stack = {NULL, NULL, 0};
 List lines = {NULL, NULL, 0};
 List clipboard = {NULL, NULL, 0};
 Pos cursor = {0, 0};
@@ -119,6 +121,71 @@ my_strdup(const char *s){
   if(d != NULL)
     strcpy(d, s);
   return(d);
+}
+ 
+List
+clone_buffer(List *buffer){
+  List newlist = {NULL, NULL, 0};
+  Node *n;
+  FOR_EACH_NODE(*buffer, n){
+    char *s = n->data;
+    add_node_to_tail(&newlist, my_strdup(s));
+  }
+  return(newlist);
+}
+
+void
+clear_buffer(List *buffer){
+  while(buffer->size > 0)
+    delete_node(buffer, buffer->head);
+}
+
+void
+clean_stack(List *stack){
+  while(stack->size > 0){
+    List *buffer = stack->tail->data;
+    clear_buffer(buffer);
+    delete_node(stack, stack->tail);
+  }
+}
+
+void
+add_undo_copy(){
+  List *new_buffer = calloc(1, sizeof(List));
+  *new_buffer = clone_buffer(&lines);
+  add_node_to_tail(&undo_stack, new_buffer);
+  clean_stack(&redo_stack);
+}
+
+/* move last buffer from stack1 to stack2 */
+void
+move_last_buffer(List *st1, List *st2){
+  if(st1->size > 0){
+    List *buffer = extruct_data(st1, st1->tail);
+    add_node_to_tail(st2, buffer);
+  }
+}
+
+void
+undo(){
+  if(undo_stack.size > 0){
+    List *buffer;
+    clear_buffer(&lines);
+    buffer = undo_stack.tail->data;
+    lines = clone_buffer(buffer);
+    move_last_buffer(&undo_stack, &redo_stack);
+  }
+}
+
+void
+redo(){
+  if(redo_stack.size > 0){
+    List *buffer;
+    clear_buffer(&lines);
+    buffer = redo_stack.tail->data;
+    lines = clone_buffer(buffer);
+    move_last_buffer(&redo_stack, &undo_stack);
+  }
 }
 
 void
@@ -187,9 +254,11 @@ drawlines(int from, int n){
 void
 draw_statusline(){
   char s[120];
-  sprintf(s, "(c-%i-%i  m-%i-%i)  %s",
+  sprintf(s, "(c-%i-%i  m-%i-%i u-%i/%i)  %s",
       cursor.y, cursor.x,
       marker.y, marker.x,
+      undo_stack.size,
+      redo_stack.size,
       statusline);
   move(screen_size.y, 0);
   clrtoeol();
@@ -523,19 +592,21 @@ mainloop(){
     if(c=='u') screenup();
     if(c=='D') cursor.y = lines.size-1;
     if(c=='U') cursor.y = 0;
-    if(c=='r') replace_char(getch());
-    if(c=='i') insert();
-    if(c=='x') removechar();
     if(c=='g') gotostr();
-    if(c=='o') newstr("\n");
     if(c=='F') get_search_template();
     if(c=='f') findnext();
     if(c=='w') writefile(filename);
     if(c=='W') writeas();
-    if(c=='X') removelines();
     if(c=='m') setmark();
     if(c=='c') copy();
-    if(c=='p') paste();
+    if(c=='o') { add_undo_copy(); newstr("\n"); }
+    if(c=='i') { add_undo_copy(); insert(); }
+    if(c=='r') { add_undo_copy(); replace_char(getch()); }
+    if(c=='x') { add_undo_copy(); removechar(); }
+    if(c=='X') { add_undo_copy(); removelines(); }
+    if(c=='p') { add_undo_copy(); paste(); }
+    if(c=='[') undo();
+    if(c==']') redo();
     correct_scr();
     correct_x();
     draw();
