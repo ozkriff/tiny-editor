@@ -294,18 +294,13 @@ drawline(char *s){
 }
 
 void
-drawlines(Buffer b, int from, int n){
-  char *s;
-  Node *nd = b.head;
-  int i = 0;
-  FOR_EACH_NODE(b, nd){
-    if(i >= from){
-      if(i == n+from)
-        return;
-      s = nd->data;
-      drawline(s);
-    }
-    i++;
+drawlines(Buffer b, int from, int count){
+  Node *nd = id2node(b, from);
+  while(nd && count > 0){
+    char *s = nd->data;
+    drawline(s);
+    nd = nd->next;
+    count--;
   }
 }
 
