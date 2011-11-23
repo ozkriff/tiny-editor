@@ -320,12 +320,26 @@ id2str(int line){
   return(s);
 }
 
+int
+find_screen_x(Pos p){
+  /*offset in screen positions*/
+  int screen_x = 0;
+  /*offset in bytes*/
+  int o = 0;
+  char *s = id2str(p.y);
+  while(o < p.x){
+    screen_x++;
+    o += utf8len(s[o]);
+  }
+  return(screen_x);
+}
+
 void
 draw(){
   move(0, 0);
   drawlines(scrpos.y, screen_size.y);
   draw_statusline();
-  move(cursor.y-scrpos.y, cursor.x);
+  move(cursor.y-scrpos.y, find_screen_x(cursor));
   refresh();
 }
 
@@ -358,11 +372,23 @@ mv_prevln(){
 void
 mv_nextch(){
   char *s = id2str(cursor.y);
-  cursor.x++;
+  cursor.x += utf8len(s[cursor.x]);
   if(s[cursor.x] == '\0'){
     mv_nextln();
     cursor.x = 0;
   }
+}
+
+int
+find_prev_char_offset(Pos p){
+  unsigned char c;
+  char *s = id2str(p.y);
+  int of = p.x; /*offset in bytes*/
+  do{
+    of--;
+    c = s[of];
+  } while(of >= 0 && is_fill(c));
+  return(of);
 }
 
 void
@@ -373,7 +399,7 @@ mv_prevch(){
     s = id2str(cursor.y);
     cursor.x = strlen(s)-1;
   }else{
-    cursor.x--;
+    cursor.x = find_prev_char_offset(cursor);
   }
 }
 
@@ -459,7 +485,7 @@ removechar(){
   if(s[cursor.x] == '\n')
     join(s);
   else
-    strcpy(s+cursor.x, s+cursor.x+1);
+    strcpy(s+cursor.x, s+cursor.x+utf8len(s[cursor.x]));
 }
 
 void
