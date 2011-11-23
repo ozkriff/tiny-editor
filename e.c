@@ -108,7 +108,7 @@ List clipboard = {NULL, NULL, 0};
 Pos cursor = {0, 0};
 Pos marker = {0, 0};
 Pos scrpos = {0, 0};
-Pos screen_size;
+Pos screen_size = {0, 0};
 char search_template[100] = "...";
 char statusline[200] = "[ozkriff's ed]";
 char filename[100];
