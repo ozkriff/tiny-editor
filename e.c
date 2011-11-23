@@ -276,11 +276,11 @@ drawline(char *s){
 }
 
 void
-drawlines(int from, int n){
+drawlines(Buffer b, int from, int n){
   char *s;
-  Node *nd = lines.head;
+  Node *nd = b.head;
   int i = 0;
-  FOR_EACH_NODE(lines, nd){
+  FOR_EACH_NODE(b, nd){
     if(i >= from){
       if(i == n+from)
         return;
@@ -340,7 +340,7 @@ find_screen_x(Pos p){
 void
 draw(){
   move(0, 0);
-  drawlines(scrpos.y, screen_size.y);
+  drawlines(lines, scrpos.y, screen_size.y);
   draw_statusline();
   move(cursor.y-scrpos.y, find_screen_x(cursor));
   refresh();
