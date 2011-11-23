@@ -175,6 +175,38 @@ id2str(Buffer b, int line){
 }
 
 Buffer
+copy(Buffer original, int from, int to){
+  Buffer b = {NULL, NULL, 0};
+  Node *n = id2node(original, from);
+  while(from <= to && n){
+    char *s = n->data;
+    add_node_to_tail(&b, my_strdup(s));
+    n = n->next;
+    from++;
+  }
+  return(b);
+}
+
+void
+paste(Buffer *to, Buffer from, int fromline){
+  Node *n = id2node(*to, fromline);
+  int i = fromline - 1;
+  FOR_EACH_NODE(from, n){
+    char *s = n->data;
+    insert_node(to, my_strdup(s), id2node(*to, i));
+    i++;
+  }
+}
+
+void
+removelines(Buffer *b, int from, int count){
+  while(count > 0){
+    delete_node(b, id2node(*b, from));
+    count--;
+  }
+}
+
+Buffer
 clone_buffer(Buffer buffer){
   Buffer newlist = {NULL, NULL, 0};
   Node *n;
@@ -558,14 +590,6 @@ get_search_template(){
 }
 
 void
-removelines(Buffer *b, int from, int count){
-  while(count > 0){
-    delete_node(b, id2node(*b, from));
-    count--;
-  }
-}
-
-void
 writeas(){
   char newfname[100]; /* new file name */
   echo();
@@ -585,30 +609,6 @@ void
 clean_clipboard(){
   while(clipboard.size != 0)
     delete_node(&clipboard, clipboard.head);
-}
-
-Buffer
-copy(Buffer original, int from, int to){
-  Buffer b = {NULL, NULL, 0};
-  Node *n = id2node(original, from);
-  while(from <= to && n){
-    char *s = n->data;
-    add_node_to_tail(&b, my_strdup(s));
-    n = n->next;
-    from++;
-  }
-  return(b);
-}
-
-void
-paste(Buffer *to, Buffer from, int fromline){
-  Node *n = id2node(*to, fromline);
-  int i = fromline - 1;
-  FOR_EACH_NODE(from, n){
-    char *s = n->data;
-    insert_node(to, my_strdup(s), id2node(*to, i));
-    i++;
-  }
 }
 
 void
