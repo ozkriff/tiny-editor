@@ -318,12 +318,7 @@ add_undo_copy(){
   Diff *d = calloc(1, sizeof(Diff));
   *d = create_diff(lines, prevlines);
   add_node_to_tail(&undo_stack, d);
-#if 0
   redo_diff(&prevlines, *d);
-#else
-  clear_buffer(&prevlines);
-  prevlines = clone_buffer(lines);
-#endif
   clean_stack(&redo_stack);
 }
 
