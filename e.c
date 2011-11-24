@@ -202,7 +202,7 @@ copy(Buffer original, int from, int to){
 void
 paste(Buffer *to, Buffer from, int fromline){
   Node *n = id2node(*to, fromline);
-  int i = fromline - 1;
+  int i = fromline;
   FOR_EACH_NODE(from, n){
     char *s = n->data;
     insert_node(to, my_strdup(s), id2node(*to, i));
@@ -304,13 +304,13 @@ create_diff(Buffer changed, Buffer original){
 void
 undo_diff(Buffer *buffer, Diff d){
   removelines(buffer, d.first, d.from_changed.size);
-  paste(buffer, d.from_original, d.first);
+  paste(buffer, d.from_original, d.first - 1);
 }
 
 void
 redo_diff(Buffer *buffer, Diff d){
   removelines(buffer, d.first, d.from_original.size);
-  paste(buffer, d.from_changed, d.first);
+  paste(buffer, d.from_changed, d.first - 1);
 }
 
 void
