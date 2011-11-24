@@ -740,32 +740,32 @@ insert_empty_line(){
 
 void
 command(int c){
-  if(c=='h') move_prevch();
-  if(c=='l') move_nextch();
-  if(c=='j') move_nextln();
-  if(c=='k') move_prevln();
-  if(c=='H') move_bol();
-  if(c=='L') move_eol();
-  if(c=='d') move_halfscreendown();
-  if(c=='u') move_halfscreenup();
-  if(c=='D') move_bob();
-  if(c=='U') move_eob();
-  if(c=='g') move_toline();
-  if(c=='F') get_search_template();
-  if(c=='f') findnext();
-  if(c=='w') writefile(lines, filename);
-  if(c=='W') writeas(lines);
-  if(c=='m') setmark();
-  if(c=='c') copy_to_clipboard();
-  if(c=='o') { insert_empty_line(); add_undo_copy(); }
-  if(c=='i') { insert(); add_undo_copy(); }
-  if(c=='r') { replace_char(getch()); add_undo_copy(); }
-  if(c=='x') { removechar(); add_undo_copy(); }
-  if(c=='X') { removeselected(); add_undo_copy(); }
-  if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
-  if(c=='[') undo();
-  if(c==']') redo();
   if(c=='q') quit();
+  else if(c=='h') move_prevch();
+  else if(c=='l') move_nextch();
+  else if(c=='j') move_nextln();
+  else if(c=='k') move_prevln();
+  else if(c=='H') move_bol();
+  else if(c=='L') move_eol();
+  else if(c=='d') move_halfscreendown();
+  else if(c=='u') move_halfscreenup();
+  else if(c=='D') move_bob();
+  else if(c=='U') move_eob();
+  else if(c=='g') move_toline();
+  else if(c=='F') get_search_template();
+  else if(c=='f') findnext();
+  else if(c=='w') writefile(lines, filename);
+  else if(c=='W') writeas(lines);
+  else if(c=='m') setmark();
+  else if(c=='c') copy_to_clipboard();
+  else if(c=='o') { insert_empty_line(); add_undo_copy(); }
+  else if(c=='i') { insert(); add_undo_copy(); }
+  else if(c=='r') { replace_char(getch()); add_undo_copy(); }
+  else if(c=='x') { removechar(); add_undo_copy(); }
+  else if(c=='X') { removeselected(); add_undo_copy(); }
+  else if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
+  else if(c=='[') undo();
+  else if(c==']') redo();
 }
 
 void
