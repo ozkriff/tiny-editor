@@ -683,12 +683,6 @@ setmark(){
 }
 
 void
-clean_clipboard(){
-  while(clipboard.size != 0)
-    delete_node(&clipboard, clipboard.head);
-}
-
-void
 correct_x(){
   int len = strlen(id2str(lines, cursor.y));
   if(cursor.x >= len)
@@ -750,7 +744,7 @@ mainloop(){
     if(c=='W') writeas(lines);
     if(c=='m') setmark();
     if(c=='c') {
-      clean_clipboard();
+      clear_buffer(&clipboard);
       clipboard = copy(lines, marker.y, cursor.y);
     }
     if(c=='o') { newstr("\n"); add_undo_copy(); }
