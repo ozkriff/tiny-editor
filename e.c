@@ -451,7 +451,7 @@ draw(){
 }
 
 void
-mv_nextln(){
+move_nextln(){
   char *s;
   int n;
   if(cursor.y == (lines.size-1))
@@ -464,7 +464,7 @@ mv_nextln(){
 }
 
 void
-mv_prevln(){
+move_prevln(){
   char *s;
   int n;
   if(cursor.y == 0)
@@ -477,11 +477,11 @@ mv_prevln(){
 }
 
 void
-mv_nextch(){
+move_nextch(){
   char *s = id2str(lines, cursor.y);
   cursor.x += utf8len(s[cursor.x]);
   if(s[cursor.x] == '\0'){
-    mv_nextln();
+    move_nextln();
     cursor.x = 0;
   }
 }
@@ -499,10 +499,10 @@ find_prev_char_offset(Pos p){
 }
 
 void
-mv_prevch(){
+move_prevch(){
   char *s;
   if(cursor.x == 0){
-    mv_prevln();
+    move_prevln();
     s = id2str(lines, cursor.y);
     cursor.x = strlen(s)-1;
   }else{
@@ -513,7 +513,7 @@ mv_prevch(){
 void
 newstr(char *data){
   insert_node(&lines, my_strdup(data), id2node(lines, cursor.y));
-  mv_nextln();
+  move_nextln();
   cursor.x = 0;
 }
 
@@ -558,17 +558,17 @@ insert(){
 }
 
 void
-screenup(){
+move_halfscreenup(){
   int i;
   for(i=0; i<screen_size.y/2; i++)
-    mv_prevln();
+    move_prevln();
 }
 
 void
-screendown(){
+move_halfscreendown(){
   int i;
   for(i=0; i<screen_size.y/2; i++)
-    mv_nextln();
+    move_nextln();
 }
 
 void
@@ -596,7 +596,7 @@ removechar(){
 }
 
 void
-gotostr(){
+move_toline(){
   int n;
   move(screen_size.y, 0);
   printw("enter line number: ");
@@ -703,23 +703,47 @@ quit(){
     is_running = false;
 }
 
+/*Move cursor to beginig of line*/
+void
+move_bol(){
+  cursor.x = 0;
+}
+
+/*Move cursor to ending of buffer*/
+void
+move_eol(){
+  cursor.x = strlen(id2str(lines, cursor.y))-1;
+}
+
+/*Move cursor to beginig of buffer*/
+void
+move_bob(){
+  cursor.y = lines.size-1;
+}
+
+/*Move cursor to ending of buffer*/
+void
+move_eob(){
+  cursor.y = 0;
+}
+
 void
 mainloop(){
   int c;
   while(is_running){
     c = getch();
     sprintf(statusline, "[key '%i']", c);
-    if(c=='h') mv_prevch();
-    if(c=='l') mv_nextch();
-    if(c=='j') mv_nextln();
-    if(c=='k') mv_prevln();
-    if(c=='H') cursor.x = 0;
-    if(c=='L') cursor.x = strlen(id2str(lines, cursor.y))-1;
-    if(c=='d') screendown();
-    if(c=='u') screenup();
-    if(c=='D') cursor.y = lines.size-1;
-    if(c=='U') cursor.y = 0;
-    if(c=='g') gotostr();
+    if(c=='h') move_prevch();
+    if(c=='l') move_nextch();
+    if(c=='j') move_nextln();
+    if(c=='k') move_prevln();
+    if(c=='H') move_bol();
+    if(c=='L') move_eol();
+    if(c=='d') move_halfscreendown();
+    if(c=='u') move_halfscreenup();
+    if(c=='D') move_bob();
+    if(c=='U') move_eob();
+    if(c=='g') move_toline();
     if(c=='F') get_search_template();
     if(c=='f') findnext();
     if(c=='w') writefile(lines, filename);
