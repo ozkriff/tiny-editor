@@ -503,7 +503,6 @@ insert_char(char c[6], int len, Pos p){
   }
 }
 
-
 void
 insert(){
   char c[6];
