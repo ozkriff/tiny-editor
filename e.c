@@ -760,7 +760,7 @@ insert_empty_line(){
 }
 
 void
-command(int c){
+command(char c){
   if(c=='q') quit();
   else if(c=='h') move_prevch();
   else if(c=='l') move_nextch();
@@ -791,10 +791,10 @@ command(int c){
 
 void
 mainloop(){
-  int c;
+  char c;
   while(is_running){
-    c = getch();
-    sprintf(statusline, "[key '%i']", c);
+    c = (char)getch();
+    sprintf(statusline, "[key '%i']", (int)c);
     command(c);
     correct_scr();
     correct_x();
