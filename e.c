@@ -734,6 +734,11 @@ removeselected(){
 }
 
 void
+insert_empty_line(){
+  newstr("\n");
+}
+
+void
 command(int c){
   if(c=='h') move_prevch();
   if(c=='l') move_nextch();
@@ -752,7 +757,7 @@ command(int c){
   if(c=='W') writeas(lines);
   if(c=='m') setmark();
   if(c=='c') copy_to_clipboard();
-  if(c=='o') { newstr("\n"); add_undo_copy(); }
+  if(c=='o') { insert_empty_line(); add_undo_copy(); }
   if(c=='i') { insert(); add_undo_copy(); }
   if(c=='r') { replace_char(getch()); add_undo_copy(); }
   if(c=='x') { removechar(); add_undo_copy(); }
