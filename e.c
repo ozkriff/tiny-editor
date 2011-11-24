@@ -128,7 +128,7 @@ Pos marker = {0, 0};
 Pos scrpos = {0, 0};
 Pos screen_size = {0, 0};
 char search_template[100] = "...";
-char statusline[200] = "[ozkriff's ed]";
+char statusline[200] = "ozkriff's ed";
 char filename[100];
 
 bool
@@ -355,7 +355,7 @@ readfile(Buffer *b, char *filename){
   while(fgets(s, 300, f))
     add_node_to_tail(b, my_strdup(s));
   fclose(f);
-  sprintf(statusline, "[opened '%s']", filename);
+  sprintf(statusline, "opened '%s'", filename);
 }
 
 void
@@ -391,7 +391,7 @@ writefile(Buffer b, char *filename){
     fputs(s, f);
   }
   fclose(f);
-  sprintf(statusline, "[written %s]", filename);
+  sprintf(statusline, "written %s", filename);
 }
 
 void
@@ -507,12 +507,12 @@ void
 insert(){
   char c[6];
   int len;
-  sprintf(statusline, "[insert mode. ESC - return to normal mode]");
+  sprintf(statusline, "insert mode. ESC - return to normal mode");
   draw();
   while(1){
     get_utf8char(c, &len);
     if(c[0] == 0x1B/*esc*/){
-      sprintf(statusline, "[normal mode]");
+      sprintf(statusline, "normal mode");
       return;
     }
     insert_char(c, len, cursor);
@@ -624,9 +624,9 @@ move_toline(){
   scanw("%i", &n);
   noecho();
   if(n < 0 || n > lines.size - 1){
-    sprintf(statusline, "[bad line number]");
+    sprintf(statusline, "bad line number");
   }else{
-    sprintf(statusline, "[moved to %i line]", n);
+    sprintf(statusline, "moved to %i line", n);
     cursor.y = n;
   }
 }
@@ -793,7 +793,7 @@ mainloop(){
   char c;
   while(is_running){
     c = (char)getch();
-    sprintf(statusline, "[key '%i']", (int)c);
+    sprintf(statusline, "key '%i'", (int)c);
     command(c);
     correct_scr();
     correct_x();
