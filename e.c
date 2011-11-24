@@ -451,6 +451,26 @@ draw(){
 }
 
 void
+insert_text_into_line(char *s, int len, Pos p){
+  char *old_s = id2str(lines, p.y);
+  char *new_s = calloc(strlen(old_s) + 1 + len, sizeof(char));
+  strncpy(new_s, old_s, p.x);
+  strncpy(new_s + p.x, s, len);
+  strcpy(new_s + p.x + len, old_s + p.x);
+  free(old_s);
+  id2node(lines, p.y)->data = new_s;
+}
+
+void
+get_utf8char(char c[6], int *len){
+  int i;
+  c[0] = getch();
+  (*len) = utf8len(c[0]);
+  for(i = 1; i < (*len); i++)
+    c[i] = getch();
+}
+
+void
 move_nextln(){
   char *s;
   int n;
@@ -461,6 +481,46 @@ move_nextln(){
   n = strlen(s)-1;
   if(cursor.x > n)
     cursor.x = n;
+}
+
+void
+newstr(char *data){
+  insert_node(&lines, my_strdup(data), id2node(lines, cursor.y));
+  move_nextln();
+  cursor.x = 0;
+}
+
+void
+insert_char(char c[6], int len, Pos p){
+  if(c[0] == '\n'){
+    char *s = id2str(lines, p.y);
+    int old_x = p.x;
+    newstr(s + p.x);
+    s[old_x] = '\n';
+    s[old_x + 1] = '\0';
+  }else{
+    insert_text_into_line(c, len, p);
+  }
+}
+
+
+void
+insert(){
+  char c[6];
+  int len;
+  sprintf(statusline, "[insert mode. ESC - return to normal mode]");
+  draw();
+  while(1){
+    get_utf8char(c, &len);
+    if(c[0] == 0x1B/*esc*/){
+      sprintf(statusline, "[normal mode]");
+      return;
+    }
+    insert_char(c, len, cursor);
+    if(c[0] != '\n')
+      cursor.x += len;
+    draw();
+  }
 }
 
 void
@@ -511,67 +571,6 @@ move_prevch(){
 }
 
 void
-newstr(char *data){
-  insert_node(&lines, my_strdup(data), id2node(lines, cursor.y));
-  move_nextln();
-  cursor.x = 0;
-}
-
-void
-replace_char(char c){
-  char *s = id2str(lines, cursor.y);
-  if(c=='\n'){
-    int oldx = cursor.x;
-    newstr(s + cursor.x);
-    s[oldx] = '\n';
-    s[oldx+1] = '\0';
-  }else if(c=='\t'){
-    s[cursor.x] = ' ';
-  }else{
-    s[cursor.x] = c;
-  }
-}
-
-void
-insert(){
-  char c;
-  char *str;
-  char *nstr;
-  sprintf(statusline, "[insert mode. ESC - return to normal mode]");
-  draw();
-  while( (c=getch()) != 27){
-    if(c!='\n'){
-      str = id2str(lines, cursor.y);
-      nstr = calloc(strlen(str)+1+1, sizeof(char));
-      strncpy(nstr, str, cursor.x);
-      strcpy(nstr + cursor.x + 1, str + cursor.x);
-      free(str);
-      id2node(lines, cursor.y)->data = nstr;
-      replace_char(c);
-      cursor.x++;
-    }else{
-      replace_char(c);
-    }
-    draw();
-  }
-  sprintf(statusline, "[normal mode]");
-}
-
-void
-move_halfscreenup(){
-  int i;
-  for(i=0; i<screen_size.y/2; i++)
-    move_prevln();
-}
-
-void
-move_halfscreendown(){
-  int i;
-  for(i=0; i<screen_size.y/2; i++)
-    move_nextln();
-}
-
-void
 join(char *s){
   int len1 = strlen(s) + 1;
   /* next string */
@@ -593,6 +592,29 @@ removechar(){
     join(s);
   else
     strcpy(s+cursor.x, s+cursor.x+utf8len(s[cursor.x]));
+}
+
+void
+replace_char(){
+  char c[6];
+  int len; /*character size in bytes*/
+  removechar();
+  get_utf8char(c, &len);
+  insert_char(c, len, cursor);
+}
+
+void
+move_halfscreenup(){
+  int i;
+  for(i=0; i<screen_size.y/2; i++)
+    move_prevln();
+}
+
+void
+move_halfscreendown(){
+  int i;
+  for(i=0; i<screen_size.y/2; i++)
+    move_nextln();
 }
 
 void
@@ -760,7 +782,7 @@ command(int c){
   else if(c=='c') copy_to_clipboard();
   else if(c=='o') { insert_empty_line(); add_undo_copy(); }
   else if(c=='i') { insert(); add_undo_copy(); }
-  else if(c=='r') { replace_char(getch()); add_undo_copy(); }
+  else if(c=='r') { replace_char(); add_undo_copy(); }
   else if(c=='x') { removechar(); add_undo_copy(); }
   else if(c=='X') { removeselected(); add_undo_copy(); }
   else if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
