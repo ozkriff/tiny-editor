@@ -734,13 +734,13 @@ move_eol(){
 /*Move cursor to beginig of buffer*/
 void
 move_bob(){
-  cursor.y = lines.size-1;
+  cursor.y = 0;
 }
 
 /*Move cursor to ending of buffer*/
 void
 move_eob(){
-  cursor.y = 0;
+  cursor.y = lines.size-1;
 }
 
 void
@@ -771,8 +771,8 @@ command(int c){
   else if(c=='L') move_eol();
   else if(c=='d') move_halfscreendown();
   else if(c=='u') move_halfscreenup();
-  else if(c=='D') move_bob();
-  else if(c=='U') move_eob();
+  else if(c=='D') move_eob();
+  else if(c=='U') move_bob();
   else if(c=='g') move_toline();
   else if(c=='F') get_search_template();
   else if(c=='f') findnext();
