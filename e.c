@@ -762,6 +762,11 @@ init(){
   screen_size.y--;
 }
 
+void
+create_empty_buffer(){
+  newstr("");
+}
+
 int
 main(int ac, char **av){
   init();
@@ -770,7 +775,7 @@ main(int ac, char **av){
     readfile(filename);
     prevlines = clone_buffer(lines);
   }else{
-    newstr("");
+    create_empty_buffer();
   }
   draw();
   mainloop();
