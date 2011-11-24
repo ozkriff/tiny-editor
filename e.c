@@ -722,6 +722,12 @@ move_eob(){
 }
 
 void
+copy_to_clipboard(){
+  clear_buffer(&clipboard);
+  clipboard = copy(lines, marker.y, cursor.y);
+}
+
+void
 mainloop(){
   int c;
   while(is_running){
@@ -743,10 +749,7 @@ mainloop(){
     if(c=='w') writefile(lines, filename);
     if(c=='W') writeas(lines);
     if(c=='m') setmark();
-    if(c=='c') {
-      clear_buffer(&clipboard);
-      clipboard = copy(lines, marker.y, cursor.y);
-    }
+    if(c=='c') copy_to_clipboard();
     if(c=='o') { newstr("\n"); add_undo_copy(); }
     if(c=='i') { insert(); add_undo_copy(); }
     if(c=='r') { replace_char(getch()); add_undo_copy(); }
