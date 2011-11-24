@@ -354,11 +354,11 @@ redo(){
 }
 
 void
-readfile(char *filename){
+readfile(Buffer *b, char *filename){
   FILE *f = fopen(filename, "r");
   char s[300];
   while(fgets(s, 300, f))
-    add_node_to_tail(&lines, my_strdup(s));
+    add_node_to_tail(b, my_strdup(s));
   fclose(f);
   sprintf(statusline, "[opened '%s']", filename);
 }
@@ -772,7 +772,7 @@ main(int ac, char **av){
   init();
   if(ac == 2){
     strcpy(filename, av[1]);
-    readfile(filename);
+    readfile(&lines, filename);
     prevlines = clone_buffer(lines);
   }else{
     create_empty_buffer();
