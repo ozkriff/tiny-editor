@@ -734,37 +734,42 @@ removeselected(){
 }
 
 void
+command(int c){
+  if(c=='h') move_prevch();
+  if(c=='l') move_nextch();
+  if(c=='j') move_nextln();
+  if(c=='k') move_prevln();
+  if(c=='H') move_bol();
+  if(c=='L') move_eol();
+  if(c=='d') move_halfscreendown();
+  if(c=='u') move_halfscreenup();
+  if(c=='D') move_bob();
+  if(c=='U') move_eob();
+  if(c=='g') move_toline();
+  if(c=='F') get_search_template();
+  if(c=='f') findnext();
+  if(c=='w') writefile(lines, filename);
+  if(c=='W') writeas(lines);
+  if(c=='m') setmark();
+  if(c=='c') copy_to_clipboard();
+  if(c=='o') { newstr("\n"); add_undo_copy(); }
+  if(c=='i') { insert(); add_undo_copy(); }
+  if(c=='r') { replace_char(getch()); add_undo_copy(); }
+  if(c=='x') { removechar(); add_undo_copy(); }
+  if(c=='X') { removeselected(); add_undo_copy(); }
+  if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
+  if(c=='[') undo();
+  if(c==']') redo();
+  if(c=='q') quit();
+}
+
+void
 mainloop(){
   int c;
   while(is_running){
     c = getch();
     sprintf(statusline, "[key '%i']", c);
-    if(c=='h') move_prevch();
-    if(c=='l') move_nextch();
-    if(c=='j') move_nextln();
-    if(c=='k') move_prevln();
-    if(c=='H') move_bol();
-    if(c=='L') move_eol();
-    if(c=='d') move_halfscreendown();
-    if(c=='u') move_halfscreenup();
-    if(c=='D') move_bob();
-    if(c=='U') move_eob();
-    if(c=='g') move_toline();
-    if(c=='F') get_search_template();
-    if(c=='f') findnext();
-    if(c=='w') writefile(lines, filename);
-    if(c=='W') writeas(lines);
-    if(c=='m') setmark();
-    if(c=='c') copy_to_clipboard();
-    if(c=='o') { newstr("\n"); add_undo_copy(); }
-    if(c=='i') { insert(); add_undo_copy(); }
-    if(c=='r') { replace_char(getch()); add_undo_copy(); }
-    if(c=='x') { removechar(); add_undo_copy(); }
-    if(c=='X') { removeselected(); add_undo_copy(); }
-    if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
-    if(c=='[') undo();
-    if(c==']') redo();
-    if(c=='q') quit();
+    command(c);
     correct_scr();
     correct_x();
     draw();
