@@ -382,7 +382,7 @@ really(char *message){
 }
 
 void
-writefile(char *filename){
+writefile(Buffer b, char *filename){
   Node *nd;
   FILE *f = fopen(filename, "w");
   if(!really("Save file? [y/n]"))
@@ -391,7 +391,7 @@ writefile(char *filename){
     puts("NO FILE!");
     exit(1);
   }
-  FOR_EACH_NODE(lines, nd){
+  FOR_EACH_NODE(b, nd){
     char *s = nd->data;
     fputs(s, f);
   }
@@ -679,7 +679,7 @@ writeas(){
   printw("Enter new file name: ");
   scanw("%s", newfname);
   noecho();
-  writefile(newfname);
+  writefile(lines, newfname);
 }
 
 void
@@ -727,7 +727,7 @@ mainloop(){
     if(c=='g') gotostr();
     if(c=='F') get_search_template();
     if(c=='f') findnext();
-    if(c=='w') writefile(filename);
+    if(c=='w') writefile(lines, filename);
     if(c=='W') writeas();
     if(c=='m') setmark();
     if(c=='c') {
