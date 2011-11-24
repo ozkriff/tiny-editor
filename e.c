@@ -728,6 +728,12 @@ copy_to_clipboard(){
 }
 
 void
+removeselected(){
+  removelines(&lines, marker.y, 1 + cursor.y - marker.y);
+  cursor.y = marker.y;
+}
+
+void
 mainloop(){
   int c;
   while(is_running){
@@ -754,11 +760,7 @@ mainloop(){
     if(c=='i') { insert(); add_undo_copy(); }
     if(c=='r') { replace_char(getch()); add_undo_copy(); }
     if(c=='x') { removechar(); add_undo_copy(); }
-    if(c=='X') {
-      removelines(&lines, marker.y, 1 + cursor.y - marker.y);
-      add_undo_copy();
-      cursor.y = marker.y;
-    }
+    if(c=='X') { removeselected(); add_undo_copy(); }
     if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
     if(c=='[') undo();
     if(c==']') redo();
