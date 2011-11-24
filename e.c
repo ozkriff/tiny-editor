@@ -672,14 +672,14 @@ get_search_template(){
 }
 
 void
-writeas(){
+writeas(Buffer b){
   char newfname[100]; /* new file name */
   echo();
   move(screen_size.y, 0);
   printw("Enter new file name: ");
   scanw("%s", newfname);
   noecho();
-  writefile(lines, newfname);
+  writefile(b, newfname);
 }
 
 void
@@ -728,7 +728,7 @@ mainloop(){
     if(c=='F') get_search_template();
     if(c=='f') findnext();
     if(c=='w') writefile(lines, filename);
-    if(c=='W') writeas();
+    if(c=='W') writeas(lines);
     if(c=='m') setmark();
     if(c=='c') {
       clean_clipboard();
