@@ -437,7 +437,7 @@ find_screen_x(Pos p){
   char *s = id2str(lines, p.y);
   while(o < p.x){
     if(s[o] == '\t')
-      screen_x += 8;
+      screen_x += TABSIZE;
     else
       screen_x += 1;
     o += utf8len(s[o]);
@@ -827,6 +827,7 @@ init(){
   noecho();
   getmaxyx(stdscr, screen_size.y, screen_size.x);
   screen_size.y--;
+  TABSIZE = 4;
 }
 
 void
