@@ -435,7 +435,10 @@ find_screen_x(Pos p){
   int o = 0;
   char *s = id2str(lines, p.y);
   while(o < p.x){
-    screen_x++;
+    if(s[o] == '\t')
+      screen_x += 8;
+    else
+      screen_x += 1;
     o += utf8len(s[o]);
   }
   return(screen_x);
