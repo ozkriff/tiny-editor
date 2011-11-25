@@ -126,7 +126,7 @@ Buffer clipboard = {NULL, NULL, 0};
 Buffer prevlines = {NULL, NULL, 0}; /*for diff creation*/
 Pos cursor = {0, 0};
 Pos marker = {0, 0};
-Pos scrpos = {0, 0};
+Pos screen_pos = {0, 0};
 Pos screen_size = {0, 0};
 char search_template[100] = "...";
 char statusline[200] = "ozkriff's ed";
@@ -448,9 +448,9 @@ find_screen_x(Pos p){
 void
 draw(){
   move(0, 0);
-  drawlines(lines, scrpos.y, screen_size.y);
+  drawlines(lines, screen_pos.y, screen_size.y);
   draw_statusline();
-  move(cursor.y-scrpos.y, find_screen_x(cursor));
+  move(cursor.y-screen_pos.y, find_screen_x(cursor));
   refresh();
 }
 
@@ -637,10 +637,10 @@ move_toline(){
 
 void
 correct_scr(){
-  while(cursor.y < scrpos.y)
-    scrpos.y--;
-  while(cursor.y >= scrpos.y+screen_size.y)
-    scrpos.y++;
+  while(cursor.y < screen_pos.y)
+    screen_pos.y--;
+  while(cursor.y >= screen_pos.y+screen_size.y)
+    screen_pos.y++;
 }
 
 /* get offset of substring */
