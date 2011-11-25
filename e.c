@@ -5,6 +5,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <locale.h>
+#include <signal.h>
 #include <ncurses.h>
 
 typedef struct Node Node;
@@ -804,8 +805,23 @@ mainloop(){
   }
 }
 
+/*The easiest way to handle SIGWINCH is
+  to do an endwin, followed by an refresh
+  and a screen repaint you code  yourself.
+  The refresh will pick up the new screen
+  size from the xterm's environment. */
+void
+handle_resize(){
+  endwin();
+  refresh();
+  getmaxyx(stdscr, screen_size.y, screen_size.x);
+  screen_size.y--;
+  draw();
+}
+
 void
 init(){
+  signal(SIGWINCH, handle_resize);
   setlocale(LC_ALL,"");
   initscr();
   noecho();
