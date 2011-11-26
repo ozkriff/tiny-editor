@@ -435,20 +435,6 @@ drawlines(Buffer b, int from, int count){
   }
 }
 
-void
-draw_statusline(){
-  char s[120];
-  sprintf(s, "(c-%i-%i  m-%i-%i  u-%i/%i)  %s",
-      win->cursor.y, win->cursor.x,
-      win->marker.y, win->marker.x,
-      win->undo.size,
-      win->redo.size,
-      statusline);
-  move(screen_size.y, 0);
-  clear_statusline();
-  printw(s);
-}
-
 int
 find_screen_x(Pos p){
   /*offset in screen positions*/
@@ -464,6 +450,20 @@ find_screen_x(Pos p){
     o += utf8len(s[o]);
   }
   return(screen_x);
+}
+
+void
+draw_statusline(){
+  char s[120];
+  sprintf(s, "(c-%i-%i-%i  m-%i-%i-%i  u-%i/%i)  %s",
+      win->cursor.y, win->cursor.x, find_screen_x(win->cursor),
+      win->marker.y, win->marker.x, find_screen_x(win->marker),
+      win->undo.size,
+      win->redo.size,
+      statusline);
+  move(screen_size.y, 0);
+  clear_statusline();
+  printw(s);
 }
 
 void
