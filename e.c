@@ -513,25 +513,6 @@ insert_char(char c[6], int len, Pos p){
 }
 
 void
-insert(){
-  char c[6];
-  int len;
-  sprintf(statusline, "insert mode. ESC - return to normal mode");
-  draw();
-  while(1){
-    get_utf8char(c, &len);
-    if(c[0] == 0x1B/*esc*/){
-      sprintf(statusline, "normal mode");
-      return;
-    }
-    insert_char(c, len, win->cursor);
-    if(c[0] != '\n')
-      win->cursor.x += len;
-    draw();
-  }
-}
-
-void
 move_prevln(){
   char *s;
   int n;
@@ -778,6 +759,25 @@ next_win(){
   else
     win = windows.head->data;
   clear();
+}
+
+void
+insert(){
+  char c[6];
+  int len;
+  sprintf(statusline, "insert mode. ESC - return to normal mode");
+  draw();
+  while(1){
+    get_utf8char(c, &len);
+    if(c[0] == 0x1B/*esc*/){
+      sprintf(statusline, "normal mode");
+      return;
+    }
+    insert_char(c, len, win->cursor);
+    if(c[0] != '\n')
+      win->cursor.x += len;
+    draw();
+  }
 }
 
 void
