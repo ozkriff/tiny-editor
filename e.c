@@ -118,19 +118,24 @@ typedef struct {
 /*list of 'Diff'*/
 typedef List Diff_stack;
 
+typedef struct {
+  Diff_stack undo; 
+  Diff_stack redo;
+  Buffer lines;
+  Buffer prevlines;
+  Pos cursor;
+  Pos marker;
+  Pos screen_pos;
+} Win;
+
 bool is_running = true;
-Diff_stack undo_stack = {NULL, NULL, 0}; 
-Diff_stack redo_stack = {NULL, NULL, 0};
-Buffer lines = {NULL, NULL, 0};
 Buffer clipboard = {NULL, NULL, 0};
-Buffer prevlines = {NULL, NULL, 0}; /*for diff creation*/
-Pos cursor = {0, 0};
-Pos marker = {0, 0};
-Pos screen_pos = {0, 0};
 Pos screen_size = {0, 0};
 char search_template[100] = "...";
 char statusline[200] = "ozkriff's ed";
 char filename[100];
+List windows = {NULL, NULL, 0};
+Win *win = NULL;
 
 bool
 is_ascii(char c){
@@ -317,10 +322,10 @@ redo_diff(Buffer *buffer, Diff d){
 void
 add_undo_copy(){
   Diff *d = calloc(1, sizeof(Diff));
-  *d = create_diff(lines, prevlines);
-  add_node_to_tail(&undo_stack, d);
-  redo_diff(&prevlines, *d);
-  clean_stack(&redo_stack);
+  *d = create_diff(win->lines, win->prevlines);
+  add_node_to_tail(&win->undo, d);
+  redo_diff(&win->prevlines, *d);
+  clean_stack(&win->redo);
 }
 
 void
@@ -333,19 +338,19 @@ move_last_diff(Diff_stack *st1, Diff_stack *st2){
 
 void
 undo(){
-  if(undo_stack.size > 0){
-    Diff *d = undo_stack.tail->data;
-    undo_diff(&lines, *d);
-    move_last_diff(&undo_stack, &redo_stack);
+  if(win->undo.size > 0){
+    Diff *d = win->undo.tail->data;
+    undo_diff(&win->lines, *d);
+    move_last_diff(&win->undo, &win->redo);
   }
 }
 
 void
 redo(){
-  if(redo_stack.size > 0){
-    Diff *d = redo_stack.tail->data;
-    redo_diff(&lines, *d);
-    move_last_diff(&redo_stack, &undo_stack);
+  if(win->redo.size > 0){
+    Diff *d = win->redo.tail->data;
+    redo_diff(&win->lines, *d);
+    move_last_diff(&win->redo, &win->undo);
   }
 }
 
@@ -418,10 +423,10 @@ void
 draw_statusline(){
   char s[120];
   sprintf(s, "(c-%i-%i  m-%i-%i  u-%i/%i)  %s",
-      cursor.y, cursor.x,
-      marker.y, marker.x,
-      undo_stack.size,
-      redo_stack.size,
+      win->cursor.y, win->cursor.x,
+      win->marker.y, win->marker.x,
+      win->undo.size,
+      win->redo.size,
       statusline);
   move(screen_size.y, 0);
   clear_statusline();
@@ -434,7 +439,7 @@ find_screen_x(Pos p){
   int screen_x = 0;
   /*offset in bytes*/
   int o = 0;
-  char *s = id2str(lines, p.y);
+  char *s = id2str(win->lines, p.y);
   while(o < p.x){
     if(s[o] == '\t')
       screen_x += TABSIZE;
@@ -448,21 +453,21 @@ find_screen_x(Pos p){
 void
 draw(){
   move(0, 0);
-  drawlines(lines, screen_pos.y, screen_size.y);
+  drawlines(win->lines, win->screen_pos.y, screen_size.y);
   draw_statusline();
-  move(cursor.y-screen_pos.y, find_screen_x(cursor));
+  move(win->cursor.y - win->screen_pos.y, find_screen_x(win->cursor));
   refresh();
 }
 
 void
 insert_text_into_line(char *s, int len, Pos p){
-  char *old_s = id2str(lines, p.y);
+  char *old_s = id2str(win->lines, p.y);
   char *new_s = calloc(strlen(old_s) + 1 + len, sizeof(char));
   strncpy(new_s, old_s, p.x);
   strncpy(new_s + p.x, s, len);
   strcpy(new_s + p.x + len, old_s + p.x);
   free(old_s);
-  id2node(lines, p.y)->data = new_s;
+  id2node(win->lines, p.y)->data = new_s;
 }
 
 void
@@ -478,26 +483,26 @@ void
 move_nextln(){
   char *s;
   int n;
-  if(cursor.y == (lines.size-1))
+  if(win->cursor.y == (win->lines.size-1))
     return;
-  cursor.y++;
-  s = id2str(lines, cursor.y);
+  win->cursor.y++;
+  s = id2str(win->lines, win->cursor.y);
   n = strlen(s)-1;
-  if(cursor.x > n)
-    cursor.x = n;
+  if(win->cursor.x > n)
+    win->cursor.x = n;
 }
 
 void
 newstr(char *data){
-  insert_node(&lines, my_strdup(data), id2node(lines, cursor.y));
+  insert_node(&win->lines, my_strdup(data), id2node(win->lines, win->cursor.y));
   move_nextln();
-  cursor.x = 0;
+  win->cursor.x = 0;
 }
 
 void
 insert_char(char c[6], int len, Pos p){
   if(c[0] == '\n'){
-    char *s = id2str(lines, p.y);
+    char *s = id2str(win->lines, p.y);
     int old_x = p.x;
     newstr(s + p.x);
     s[old_x] = '\n';
@@ -519,9 +524,9 @@ insert(){
       sprintf(statusline, "normal mode");
       return;
     }
-    insert_char(c, len, cursor);
+    insert_char(c, len, win->cursor);
     if(c[0] != '\n')
-      cursor.x += len;
+      win->cursor.x += len;
     draw();
   }
 }
@@ -530,29 +535,29 @@ void
 move_prevln(){
   char *s;
   int n;
-  if(cursor.y == 0)
+  if(win->cursor.y == 0)
     return;
-  cursor.y--;
-  s = id2str(lines, cursor.y);
+  win->cursor.y--;
+  s = id2str(win->lines, win->cursor.y);
   n = strlen(s)-1;
-  if(cursor.x > n)
-    cursor.x = n;
+  if(win->cursor.x > n)
+    win->cursor.x = n;
 }
 
 void
 move_nextch(){
-  char *s = id2str(lines, cursor.y);
-  cursor.x += utf8len(s[cursor.x]);
-  if(s[cursor.x] == '\0'){
+  char *s = id2str(win->lines, win->cursor.y);
+  win->cursor.x += utf8len(s[win->cursor.x]);
+  if(s[win->cursor.x] == '\0'){
     move_nextln();
-    cursor.x = 0;
+    win->cursor.x = 0;
   }
 }
 
 int
 find_prev_char_offset(Pos p){
   unsigned char c;
-  char *s = id2str(lines, p.y);
+  char *s = id2str(win->lines, p.y);
   int of = p.x; /*offset in bytes*/
   do{
     of--;
@@ -564,36 +569,36 @@ find_prev_char_offset(Pos p){
 void
 move_prevch(){
   char *s;
-  if(cursor.x == 0){
+  if(win->cursor.x == 0){
     move_prevln();
-    s = id2str(lines, cursor.y);
-    cursor.x = strlen(s)-1;
+    s = id2str(win->lines, win->cursor.y);
+    win->cursor.x = strlen(s)-1;
   }else{
-    cursor.x = find_prev_char_offset(cursor);
+    win->cursor.x = find_prev_char_offset(win->cursor);
   }
 }
 
 void
 join(){
-  char *s_orig = id2str(lines, cursor.y);
-  char *s_next = id2str(lines, cursor.y + 1);
+  char *s_orig = id2str(win->lines, win->cursor.y);
+  char *s_next = id2str(win->lines, win->cursor.y + 1);
   int len_orig = strlen(s_orig) + 1;
   int len_next = strlen(s_next) + 1;
   char *s_new = malloc(len_orig + len_next);
   strcpy(s_new, s_orig);
   strcpy(s_new + len_orig - 2, s_next);
-  delete_node(&lines, id2node(lines, cursor.y + 1));
-  id2node(lines, cursor.y)->data = s_new;
+  delete_node(&win->lines, id2node(win->lines, win->cursor.y + 1));
+  id2node(win->lines, win->cursor.y)->data = s_new;
   free(s_orig);
 }
 
 void
 removechar(){
-  char *s = id2str(lines, cursor.y);
-  if(s[cursor.x] == '\n')
+  char *s = id2str(win->lines, win->cursor.y);
+  if(s[win->cursor.x] == '\n')
     join();
   else
-    strcpy(s+cursor.x, s+cursor.x+utf8len(s[cursor.x]));
+    strcpy(s + win->cursor.x, s + win->cursor.x + utf8len(s[win->cursor.x]));
 }
 
 void
@@ -602,7 +607,7 @@ replace_char(){
   int len; /*character size in bytes*/
   removechar();
   get_utf8char(c, &len);
-  insert_char(c, len, cursor);
+  insert_char(c, len, win->cursor);
 }
 
 void
@@ -627,20 +632,20 @@ move_toline(){
   echo();
   scanw("%i", &n);
   noecho();
-  if(n < 0 || n > lines.size - 1){
+  if(n < 0 || n > win->lines.size - 1){
     sprintf(statusline, "bad line number");
   }else{
     sprintf(statusline, "moved to %i line", n);
-    cursor.y = n;
+    win->cursor.y = n;
   }
 }
 
 void
 correct_scr(){
-  while(cursor.y < screen_pos.y)
-    screen_pos.y--;
-  while(cursor.y >= screen_pos.y+screen_size.y)
-    screen_pos.y++;
+  while(win->cursor.y < win->screen_pos.y)
+    win->screen_pos.y--;
+  while(win->cursor.y >= win->screen_pos.y + screen_size.y)
+    win->screen_pos.y++;
 }
 
 /* get offset of substring */
@@ -664,15 +669,15 @@ get_offset(char *s, char *search_template){
 void
 findnext(){
   Node *nd;
-  int y = cursor.y + 1;
-  if(y >= lines.size)
+  int y = win->cursor.y + 1;
+  if(y >= win->lines.size)
     y = 0;
-  nd = id2node(lines, y);
-  while(nd && y < lines.size){
+  nd = id2node(win->lines, y);
+  while(nd && y < win->lines.size){
     char *s = nd->data;
     if(strstr(s, search_template)){
-      cursor.y = y;
-      cursor.x = get_offset(s, search_template);
+      win->cursor.y = y;
+      win->cursor.x = get_offset(s, search_template);
       return;
     }
     nd = nd->next;
@@ -703,16 +708,16 @@ writeas(Buffer b){
 
 void
 setmark(){
-  marker = cursor;
+  win->marker = win->cursor;
 }
 
 void
 correct_x(){
-  int len = strlen(id2str(lines, cursor.y));
-  if(cursor.x >= len)
-    cursor.x = len;
-  if(cursor.x < 0)
-    cursor.x = 0;
+  int len = strlen(id2str(win->lines, win->cursor.y));
+  if(win->cursor.x >= len)
+    win->cursor.x = len;
+  if(win->cursor.x < 0)
+    win->cursor.x = 0;
 }
 
 void
@@ -724,42 +729,55 @@ quit(){
 /*Move cursor to beginig of line*/
 void
 move_bol(){
-  cursor.x = 0;
+  win->cursor.x = 0;
 }
 
 /*Move cursor to ending of buffer*/
 void
 move_eol(){
-  cursor.x = strlen(id2str(lines, cursor.y))-1;
+  win->cursor.x = strlen(id2str(win->lines, win->cursor.y))-1;
 }
 
 /*Move cursor to beginig of buffer*/
 void
 move_bob(){
-  cursor.y = 0;
+  win->cursor.y = 0;
 }
 
 /*Move cursor to ending of buffer*/
 void
 move_eob(){
-  cursor.y = lines.size-1;
+  win->cursor.y = win->lines.size-1;
 }
 
 void
 copy_to_clipboard(){
   clear_buffer(&clipboard);
-  clipboard = copy(lines, marker.y, cursor.y);
+  clipboard = copy(win->lines, win->marker.y, win->cursor.y);
 }
 
 void
 removeselected(){
-  removelines(&lines, marker.y, 1 + cursor.y - marker.y);
-  cursor.y = marker.y;
+  removelines(&win->lines, win->marker.y, 1 + win->cursor.y - win->marker.y);
+  win->cursor.y = win->marker.y;
 }
 
 void
 insert_empty_line(){
   newstr("\n");
+}
+
+void
+next_win(){
+  Node *node = windows.head;
+  while(node->data != win && node){
+    node = node->next;
+  }
+  if(node->next)
+    win = node->next->data;
+  else
+    win = windows.head->data;
+  clear();
 }
 
 void
@@ -778,8 +796,8 @@ command(char c){
   else if(c=='g') move_toline();
   else if(c=='F') get_search_template();
   else if(c=='f') findnext();
-  else if(c=='w') writefile(lines, filename);
-  else if(c=='W') writeas(lines);
+  else if(c=='w') writefile(win->lines, filename);
+  else if(c=='W') writeas(win->lines);
   else if(c=='m') setmark();
   else if(c=='c') copy_to_clipboard();
   else if(c=='o') { insert_empty_line(); add_undo_copy(); }
@@ -787,9 +805,10 @@ command(char c){
   else if(c=='r') { replace_char(); add_undo_copy(); }
   else if(c=='x') { removechar(); add_undo_copy(); }
   else if(c=='X') { removeselected(); add_undo_copy(); }
-  else if(c=='p') { paste(&lines, clipboard, cursor.y); add_undo_copy(); }
+  else if(c=='p') { paste(&win->lines, clipboard, win->cursor.y); add_undo_copy(); }
   else if(c=='[') undo();
   else if(c==']') redo();
+  else if(c=='n') next_win();
 }
 
 void
@@ -835,16 +854,33 @@ create_empty_buffer(){
   newstr("");
 }
 
+void
+create_win(char *filename){
+  Win *w = calloc(1, sizeof(Win));
+  add_node_to_tail(&windows, w);
+  win = w;
+  if(filename)
+    readfile(&w->lines, filename);
+  else
+    create_empty_buffer();
+  w->prevlines = clone_buffer(w->lines);
+}
+
+void
+arg_proc(int ac, char **av){
+  int i;
+  if(ac > 1){
+    for(i = 1; i < ac; i++)
+      create_win(av[i]);
+  }else{
+    create_win(NULL);
+  }
+}
+
 int
 main(int ac, char **av){
   init();
-  if(ac == 2){
-    strcpy(filename, av[1]);
-    readfile(&lines, filename);
-    prevlines = clone_buffer(lines);
-  }else{
-    create_empty_buffer();
-  }
+  arg_proc(ac, av);
   draw();
   mainloop();
   clear();
