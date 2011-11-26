@@ -354,6 +354,7 @@ undo(){
   if(win->undo.size > 0){
     Diff *d = win->undo.tail->data;
     undo_diff(&win->lines, *d);
+    undo_diff(&win->prevlines, *d);
     move_last_diff(&win->undo, &win->redo);
   }
 }
@@ -363,6 +364,7 @@ redo(){
   if(win->redo.size > 0){
     Diff *d = win->redo.tail->data;
     redo_diff(&win->lines, *d);
+    redo_diff(&win->prevlines, *d);
     move_last_diff(&win->redo, &win->undo);
   }
 }
