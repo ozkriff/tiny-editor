@@ -140,6 +140,16 @@ char statusline[200] = "ozkriff's ed";
 List windows = {NULL, NULL, 0};
 Win *win = NULL;
 
+void
+die(const char *errstr, ...){
+  va_list ap;
+  endwin();
+  va_start(ap, errstr);
+  vfprintf(stderr, errstr, ap);
+  va_end(ap);
+  exit(EXIT_FAILURE);
+}
+
 bool
 is_ascii(char c){
   unsigned char uc = c;
@@ -394,10 +404,8 @@ writefile(Buffer b, char *filename){
   FILE *f = fopen(filename, "w");
   if(!really("Save file? [y/n]"))
     return;
-  if(!f){
-    puts("NO FILE!");
-    exit(1);
-  }
+  if(!f)
+    die("writefile(): can't open file '%s' for reading.\n", filename);
   FOR_EACH_NODE(b, nd){
     char *s = nd->data;
     fputs(s, f);
@@ -871,10 +879,8 @@ create_win(char *filename){
   win = w;
   if(filename){
     bool opened = readfile(&w->lines, filename);
-    if(!opened){
-      printf("no such file '%s'\n", filename);
-      exit(1);
-    }
+    if(!opened)
+      die("create_win(): no such file '%s'\n", filename);
     w->filename = my_strdup(filename);
   }else
     create_empty_buffer();
