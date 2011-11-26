@@ -798,10 +798,22 @@ insert(){
   }
 }
 
-void
-command(char c){
-  if(c=='q') quit();
-  else if(c=='h') move_prevch();
+bool
+command_ed(char c){
+  if(c=='o') insert_empty_line();
+  else if(c=='i') insert();
+  else if(c=='r') replace_char();
+  else if(c=='x') removechar();
+  else if(c=='X') removeselected();
+  else if(c=='p') paste(&win->lines, clipboard, win->cursor.y);
+  else return(false);
+  add_undo_copy();
+  return(true);
+}
+
+bool
+command_move(char c){
+  if(c=='h') move_prevch();
   else if(c=='l') move_nextch();
   else if(c=='j') move_nextln();
   else if(c=='k') move_prevln();
@@ -812,18 +824,21 @@ command(char c){
   else if(c=='D') move_eob();
   else if(c=='U') move_bob();
   else if(c=='g') move_toline();
+  else return(false);
+  return(true);
+}
+
+void
+command(char c){
+  if(c=='q') quit();
+  else if(command_move(c)) {}
   else if(c=='F') get_search_template();
   else if(c=='f') findnext();
   else if(c=='w') write_buffer(win->lines, win->filename);
   else if(c=='W') write_buffer_as(win->lines);
   else if(c=='m') setmark();
   else if(c=='c') copy_to_clipboard();
-  else if(c=='o') { insert_empty_line(); add_undo_copy(); }
-  else if(c=='i') { insert(); add_undo_copy(); }
-  else if(c=='r') { replace_char(); add_undo_copy(); }
-  else if(c=='x') { removechar(); add_undo_copy(); }
-  else if(c=='X') { removeselected(); add_undo_copy(); }
-  else if(c=='p') { paste(&win->lines, clipboard, win->cursor.y); add_undo_copy(); }
+  else if(command_ed(c)) {}
   else if(c=='[') undo();
   else if(c==']') redo();
   else if(c=='n') next_win();
