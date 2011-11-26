@@ -6,6 +6,9 @@
 #include <malloc.h>
 #include <locale.h>
 #include <signal.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <ncurses.h>
 
 typedef struct Node Node;
@@ -879,11 +882,36 @@ create_win(char *filename){
 }
 
 void
+read_from_stdin(){
+  int fd;
+  char s[300];
+  create_win(NULL);
+  while(!feof(stdin)){
+    fgets(s, 300, stdin);
+    add_node_to_tail(&win->lines, my_strdup(s));
+  }
+  fd = open("/dev/tty", O_RDONLY);
+  dup2(fd, 0);
+  close(fd);
+  win->prevlines = clone_buffer(win->lines);
+}
+
+void
+arg_proc_option(char *c){
+  if(strcmp(c, "-") == 0)
+    read_from_stdin();
+}
+
+void
 arg_proc(int ac, char **av){
   int i;
   if(ac > 1){
-    for(i = 1; i < ac; i++)
-      create_win(av[i]);
+    for(i = 1; i < ac; i++){
+      if(av[i][0] != '-')
+        create_win(av[i]);
+      else
+        arg_proc_option(av[i]);
+    }
   }else{
     create_win(NULL);
   }
