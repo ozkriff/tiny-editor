@@ -772,10 +772,14 @@ insert(){
     if(c[0] == 0x1B/*esc*/){
       sprintf(statusline, "normal mode");
       return;
+    }else if(c[0] == 0x7f/*backspace*/){
+      move_prevch();
+      removechar();
+    }else{
+      insert_char(c, len, win->cursor);
+      if(c[0] != '\n')
+        win->cursor.x += len;
     }
-    insert_char(c, len, win->cursor);
-    if(c[0] != '\n')
-      win->cursor.x += len;
     draw();
   }
 }
