@@ -354,14 +354,17 @@ redo(){
   }
 }
 
-void
+bool
 readfile(Buffer *b, char *filename){
   FILE *f = fopen(filename, "r");
   char s[300];
+  if(f == NULL)
+    return(false);
   while(fgets(s, 300, f))
     add_node_to_tail(b, my_strdup(s));
   fclose(f);
   sprintf(statusline, "opened '%s'", filename);
+  return(true);
 }
 
 void
@@ -864,8 +867,12 @@ create_win(char *filename){
   add_node_to_tail(&windows, w);
   win = w;
   if(filename){
+    bool opened = readfile(&w->lines, filename);
+    if(!opened){
+      printf("no such file '%s'\n", filename);
+      exit(1);
+    }
     w->filename = my_strdup(filename);
-    readfile(&w->lines, filename);
   }else
     create_empty_buffer();
   w->prevlines = clone_buffer(w->lines);
@@ -884,8 +891,8 @@ arg_proc(int ac, char **av){
 
 int
 main(int ac, char **av){
-  init();
   arg_proc(ac, av);
+  init();
   draw();
   mainloop();
   clear();
