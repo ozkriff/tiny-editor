@@ -126,6 +126,7 @@ typedef struct {
   Pos cursor;
   Pos marker;
   Pos screen_pos;
+  char *filename;
 } Win;
 
 bool is_running = true;
@@ -133,7 +134,6 @@ Buffer clipboard = {NULL, NULL, 0};
 Pos screen_size = {0, 0};
 char search_template[100] = "...";
 char statusline[200] = "ozkriff's ed";
-char filename[100];
 List windows = {NULL, NULL, 0};
 Win *win = NULL;
 
@@ -800,7 +800,7 @@ command(char c){
   else if(c=='g') move_toline();
   else if(c=='F') get_search_template();
   else if(c=='f') findnext();
-  else if(c=='w') writefile(win->lines, filename);
+  else if(c=='w') writefile(win->lines, win->filename);
   else if(c=='W') writeas(win->lines);
   else if(c=='m') setmark();
   else if(c=='c') copy_to_clipboard();
@@ -863,9 +863,10 @@ create_win(char *filename){
   Win *w = calloc(1, sizeof(Win));
   add_node_to_tail(&windows, w);
   win = w;
-  if(filename)
+  if(filename){
+    w->filename = my_strdup(filename);
     readfile(&w->lines, filename);
-  else
+  }else
     create_empty_buffer();
   w->prevlines = clone_buffer(w->lines);
 }
