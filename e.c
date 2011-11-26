@@ -399,13 +399,13 @@ really(char *message){
 }
 
 void
-writefile(Buffer b, char *filename){
+write_buffer(Buffer b, char *filename){
   Node *nd;
   FILE *f = fopen(filename, "w");
   if(!really("Save file? [y/n]"))
     return;
   if(!f)
-    die("writefile(): can't open file '%s' for reading.\n", filename);
+    die("write_buffer(): can't open file '%s' for reading.\n", filename);
   FOR_EACH_NODE(b, nd){
     char *s = nd->data;
     fputs(s, f);
@@ -691,14 +691,14 @@ get_search_template(){
 }
 
 void
-writeas(Buffer b){
+write_buffer_as(Buffer b){
   char newfname[100]; /* new file name */
   echo();
   move(screen_size.y, 0);
   printw("Enter new file name: ");
   scanw("%s", newfname);
   noecho();
-  writefile(b, newfname);
+  write_buffer(b, newfname);
 }
 
 void
@@ -814,8 +814,8 @@ command(char c){
   else if(c=='g') move_toline();
   else if(c=='F') get_search_template();
   else if(c=='f') findnext();
-  else if(c=='w') writefile(win->lines, win->filename);
-  else if(c=='W') writeas(win->lines);
+  else if(c=='w') write_buffer(win->lines, win->filename);
+  else if(c=='W') write_buffer_as(win->lines);
   else if(c=='m') setmark();
   else if(c=='c') copy_to_clipboard();
   else if(c=='o') { insert_empty_line(); add_undo_copy(); }
