@@ -778,14 +778,14 @@ next_win(){
 }
 
 void
-insert(){
+insert(char exitchar){
   char c[6];
   int len;
   sprintf(statusline, "insert mode. ESC - return to normal mode");
   draw();
   while(1){
     get_utf8char(c, &len);
-    if(c[0] == 0x1B/*esc*/){
+    if(c[0] == exitchar){
       sprintf(statusline, "normal mode");
       return;
     }else if(c[0] == 0x7f/*backspace*/){
@@ -814,7 +814,7 @@ show_buffer(Buffer b){
 bool
 command_ed(char c){
   if(c=='o') insert_empty_line();
-  else if(c=='i') insert();
+  else if(c=='i') insert(0x1B/*ESC*/);
   else if(c=='r') replace_char();
   else if(c=='x') removechar();
   else if(c=='X') removeselected();
