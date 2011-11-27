@@ -599,6 +599,36 @@ removechar(){
 }
 
 void
+remove_part_of_line(Buffer *b, int line, int from, int to){
+  char *s = id2str(*b, line);
+  char *dest = s + from;
+  char *src = s + from + to - 1;
+  int n = strlen(s) + 1 - from;
+  memmove(dest, src, n);
+}
+
+void
+remove_end_of_line(Buffer *b, int line, int from){
+  char *s = id2str(*b, line);
+  s[from] = '\n';
+  s[from+1] = '\0';
+}
+
+void
+remove_text(Buffer *b, Pos from, Pos to){
+  if(from.y > to.y){
+    sprintf(statusline, "bad interval");
+  }else if(from.y == to.y){
+    remove_part_of_line(b, from.y, from.x, to.x);
+  }else if(from.y < to.y){
+    remove_end_of_line(b, from.y, from.x);
+    remove_part_of_line(b, to.y, 0, to.x + 1);
+    removelines(b, from.y + 1, to.y - from.y - 1);
+    join(b, from);
+  }
+}
+
+void
 replace_char(){
   char c[6];
   int len; /*character size in bytes*/
@@ -755,8 +785,8 @@ copy_to_clipboard(){
 
 void
 removeselected(){
-  removelines(&win->lines, win->marker.y, 1 + win->cursor.y - win->marker.y);
-  win->cursor.y = win->marker.y;
+  remove_text(&win->lines, win->marker, win->cursor);
+  win->cursor = win->marker;
 }
 
 void
