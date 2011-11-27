@@ -576,16 +576,16 @@ move_prevch(){
 }
 
 void
-join(){
-  char *s_orig = id2str(win->lines, win->cursor.y);
-  char *s_next = id2str(win->lines, win->cursor.y + 1);
+join(Buffer *b, Pos p){
+  char *s_orig = id2str(*b, p.y);
+  char *s_next = id2str(*b, p.y + 1);
   int len_orig = strlen(s_orig) + 1;
   int len_next = strlen(s_next) + 1;
   char *s_new = malloc(len_orig + len_next);
   strcpy(s_new, s_orig);
   strcpy(s_new + len_orig - 2, s_next);
-  delete_node(&win->lines, id2node(win->lines, win->cursor.y + 1));
-  id2node(win->lines, win->cursor.y)->data = s_new;
+  delete_node(b, id2node(*b, p.y + 1));
+  id2node(*b, p.y)->data = s_new;
   free(s_orig);
 }
 
@@ -593,7 +593,7 @@ void
 removechar(){
   char *s = id2str(win->lines, win->cursor.y);
   if(s[win->cursor.x] == '\n')
-    join();
+    join(&win->lines, win->cursor);
   else
     strcpy(s + win->cursor.x, s + win->cursor.x + utf8len(s[win->cursor.x]));
 }
