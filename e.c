@@ -939,16 +939,14 @@ arg_proc_option(char *c){
 void
 arg_proc(int ac, char **av){
   int i;
-  if(ac > 1){
-    for(i = 1; i < ac; i++){
-      if(av[i][0] != '-')
-        create_win(av[i]);
-      else
-        arg_proc_option(av[i]);
-    }
-  }else{
-    create_win(NULL);
+  for(i = 1; i < ac; i++){
+    if(av[i][0] != '-')
+      create_win(av[i]);
+    else
+      arg_proc_option(av[i]);
   }
+  if(windows.size == 0)
+    create_win(NULL);
 }
 
 int
