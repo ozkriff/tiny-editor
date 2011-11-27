@@ -800,6 +800,17 @@ insert(){
   }
 }
 
+void
+show_buffer(Buffer b){
+  Node *node;
+  clear();
+  move(0, 0);
+  FOR_EACH_NODE(b, node)
+    printw(node->data);
+  getch();
+  clear();
+}
+
 bool
 command_ed(char c){
   if(c=='o') insert_empty_line();
