@@ -11,6 +11,10 @@
 #include <unistd.h>
 #include <ncurses.h>
 
+#define BS 0x08 /*backspace*/
+#define DEL 0x7f /*delete*/
+#define ESC 0x1B /*escape*/
+
 typedef struct Node Node;
 typedef struct List List;
 
