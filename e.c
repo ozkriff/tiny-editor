@@ -848,7 +848,7 @@ show_buffer(Buffer b){
 bool
 command_ed(char c){
   if(c=='o') insert_empty_line();
-  else if(c=='i') insert(0x1B/*ESC*/);
+  else if(c=='i') insert(ESC);
   else if(c=='r') replace_char();
   else if(c=='x') removechar();
   else if(c=='X') removeselected();
