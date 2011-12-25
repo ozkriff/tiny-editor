@@ -596,9 +596,10 @@ join(Buffer *b, Pos p){
 void
 removechar(){
   char *s = id2str(win->lines, win->cursor.y);
-  if(s[win->cursor.x] == '\n')
+  if(s[win->cursor.x] == '\n'){
     join(&win->lines, win->cursor);
-  else
+    clear();
+  }else
     strcpy(s + win->cursor.x, s + win->cursor.x + utf8len(s[win->cursor.x]));
 }
 
@@ -629,6 +630,7 @@ remove_text(Buffer *b, Pos from, Pos to){
     remove_part_of_line(b, to.y, 0, to.x + 1);
     removelines(b, from.y + 1, to.y - from.y - 1);
     join(b, from);
+    clear();
   }
 }
 
