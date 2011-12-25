@@ -822,7 +822,7 @@ insert(char exitchar){
     if(c[0] == exitchar){
       sprintf(statusline, "normal mode");
       return;
-    }else if(c[0] == 0x7f/*backspace*/){
+    }else if(c[0] == BS){
       move_prevch();
       removechar();
     }else{
